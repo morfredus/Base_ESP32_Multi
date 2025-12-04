@@ -18,4 +18,12 @@
     #define LOG_PRINTF(...)
 #endif
 
+// --- Configuration OLED (SSD1306) ---
+// Décommenter pour activer l'affichage OLED
+#define HAS_OLED
+#define OLED_WIDTH       128
+#define OLED_HEIGHT      64
+#define OLED_ADDR        0x3C  // Adresse I2C standard (0x3D sur certains modèles)
+#define OLED_RESET       -1    // Pas de pin de reset (-1)
+
 #endif
