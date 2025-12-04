@@ -5,6 +5,30 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.5.0] - 2025-12-04
+
+### Ajouté
+- 🎨 **Refonte majeure de l'interface web** : Design moderne avec cartouches (cards)
+- 📱 **Présentation compacte et responsive** : Grille CSS auto-responsive (mobile-friendly)
+- 🎯 **Gradient moderne** : Fond dégradé violet (667eea → 764ba2)
+- 📊 **Meilleure lisibilité** : Organisation des informations par catégories dans des cartes distinctes
+- 🔗 **Séparation des détails réseau** : Carte dédiée pour Masque/Passerelle/DNS
+- ✨ **Animations visuelles** : Hover effects et transitions sur les boutons et cartes
+- 📈 **Barre de signal WiFi** : Conversion dBm en pourcentage avec visualisation par progression
+- ⏱️ **Format uptime amélioré** : Affichage en "Xh Ym Zs" au lieu de simples secondes
+- 🔴 **Boutons redessinés** : Style gradient avec icônes (🔄 Actualiser / 🔴 Redémarrer)
+- 💾 **Monospace pour valeurs techniques** : IP, MAC, Chip ID en police monospace
+- 🌙 **Header en contraste** : Titre et version en blanc sur le gradient
+
+### Modifié
+- 🎨 CSS complètement réécrit pour le design card-based
+- 📐 Structure HTML optimisée pour flexibilité et maintenabilité
+- 🔄 Boutons réorganisés en section "actions" centralisée
+
+### Corrigé
+- 🐛 Amélioration de la lisibilité sur petits écrans
+- 🐛 Consistance visuelle entre tous les éléments de l'interface
+
 ## [0.4.0] - 2025-12-04
 
 ### Ajouté
@@ -48,6 +72,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ### Documenté
 - 📖 Section dédiée à la configuration OLED dans le README
 - 🔌 Instructions de connexion I2C pour ESP32-S3 et ESP32 Classic
+- 💡 Guide pour désactiver l'OLED si non utilisé
 - 💡 Guide pour désactiver l'OLED si non utilisé
 
 ## [0.1.0] - 2025-12-04

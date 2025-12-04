@@ -6,7 +6,7 @@ Inclut la gestion automatique du WiFi, une structure multi-environnements et le 
 ## 🚀 Fonctionnalités
 * **Multi-Cartes** : Prêt pour ESP32-S3 (N16R8, N8R8) et ESP32 Classic (DevKitC).
 * **WiFiMulti** : Tente de se connecter à une liste de réseaux connus.
-* **Serveur Web** *(Nouveau v0.3.0)* : Interface web accessible sur http://[IP_ESP32] affichant version, board, WiFi, signal et uptime avec bouton de redémarrage.
+* **Serveur Web** *(v0.5.0)* : Interface web moderne avec design par cartouches (cards), responsive et facile à lire, affichant toutes les infos système (version, board, WiFi, RAM, Flash, PSRAM, uptime, température).
 * **Sécurité** : Les identifiants WiFi sont exclus de Git (`secrets.h`).
 * **Feedback Visuel** : Gestion automatique de la LED RGB (Pin 48 sur S3) pour indiquer l'état WiFi (Jaune=Connexion, Vert=OK, Rouge=Erreur).
 * **Affichage OLED** : Support des écrans SSD1306 128x64 avec affichage du nom du projet, version, progression de connexion WiFi, SSID et adresse IP.
@@ -54,10 +54,10 @@ Pour désactiver l'OLED, commentez `#define HAS_OLED` dans `config.h`.
 
 Pour consulter l'historique complet des versions et modifications, voir [CHANGELOG.md](CHANGELOG.md).
 
-### Version actuelle : v0.4.0 (2025-12-04)
-**Nouveautés :**
-- 📊 Interface web complète avec informations techniques détaillées
-- 💾 Affichage mémoire (Flash, Heap, PSRAM) avec barres de progression
-- ⚡ Informations CPU (fréquence, cœurs, température)
-- 🌐 Détails réseau complets (IP, masque, passerelle, DNS, MAC)
-- 🎨 Interface responsive améliorée avec sections colorées
+### Version actuelle : v0.5.0 (2025-12-04)
+**Nouveautés principales :**
+- 🎨 **Interface web redessinée** : Design moderne avec cartouches (cards) pour meilleure lisibilité
+- 📱 **Responsive & Compact** : Grille auto-responsive adaptée à tous les écrans
+- 🎯 **Visuellement attrayant** : Gradient moderne, animations, boutons icônisés
+- 📊 **Données organisées** : 7 cartes distinctes pour Matériel, Flash, RAM, PSRAM, WiFi, Système, Réseau détaillé
+- ✨ **Améliorations UX** : Barres de progression pour signal WiFi, uptime en format lisible (Xh Ym Zs)

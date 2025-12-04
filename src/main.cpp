@@ -51,77 +51,124 @@ void handleRoot() {
     html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
     html += "<title>" + String(PROJECT_NAME) + "</title>";
     html += "<style>";
-    html += "body{font-family:Arial,sans-serif;margin:20px;background:#f0f0f0;}";
-    html += ".container{max-width:800px;margin:0 auto;background:white;padding:20px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}";
-    html += "h1{color:#333;border-bottom:2px solid #4CAF50;padding-bottom:10px;}";
-    html += "h2{color:#555;border-bottom:1px solid #ddd;padding-bottom:5px;margin-top:20px;}";
-    html += ".info{margin:10px 0;padding:10px;background:#e8f5e9;border-left:4px solid #4CAF50;display:flex;justify-content:space-between;}";
-    html += ".info-mem{background:#fff3e0;border-left-color:#FF9800;}";
-    html += ".info-cpu{background:#e3f2fd;border-left-color:#2196F3;}";
-    html += ".label{font-weight:bold;color:#555;}";
-    html += ".value{color:#333;}";
-    html += "button{background:#4CAF50;color:white;border:none;padding:10px 20px;border-radius:5px;cursor:pointer;margin:5px;}";
-    html += "button:hover{background:#45a049;}";
-    html += ".progress-bar{background:#ddd;height:20px;border-radius:10px;overflow:hidden;margin-top:5px;}";
-    html += ".progress-fill{background:#4CAF50;height:100%;transition:width 0.3s;}";
+    html += "* {margin:0;padding:0;box-sizing:border-box;}";
+    html += "body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;}";
+    html += ".container{max-width:900px;margin:0 auto;}";
+    html += ".header{text-align:center;color:white;margin-bottom:30px;}";
+    html += ".header h1{font-size:2.5em;margin-bottom:5px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);}";
+    html += ".header p{font-size:1.1em;opacity:0.95;}";
+    html += ".cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:20px;}";
+    html += ".card{background:white;border-radius:12px;padding:20px;box-shadow:0 8px 16px rgba(0,0,0,0.1);transition:all 0.3s ease;}";
+    html += ".card:hover{transform:translateY(-5px);box-shadow:0 12px 24px rgba(0,0,0,0.15);}";
+    html += ".card-title{font-size:1.3em;font-weight:bold;margin-bottom:15px;color:#333;border-bottom:2px solid #667eea;padding-bottom:10px;}";
+    html += ".card-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:0.95em;}";
+    html += ".card-item:last-child{border-bottom:none;}";
+    html += ".card-label{font-weight:600;color:#555;}";
+    html += ".card-value{color:#333;text-align:right;}";
+    html += ".card-value.mono{font-family:monospace;font-size:0.9em;}";
+    html += ".progress-container{margin-top:12px;}";
+    html += ".progress-label{display:flex;justify-content:space-between;font-size:0.85em;margin-bottom:5px;color:#666;}";
+    html += ".progress-bar{background:#e0e0e0;height:10px;border-radius:5px;overflow:hidden;}";
+    html += ".progress-fill{background:linear-gradient(90deg,#667eea,#764ba2);height:100%;transition:width 0.3s;}";
+    html += ".actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}";
+    html += "button{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:12px 24px;border-radius:6px;cursor:pointer;font-size:1em;font-weight:600;transition:all 0.3s;}";
+    html += "button:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(102,126,234,0.4);}";
+    html += "button.danger{background:linear-gradient(135deg,#f093fb,#f5576c);}";
+    html += "button.danger:hover{box-shadow:0 4px 12px rgba(245,87,108,0.4);}";
+    html += ".signal-bar{display:inline-block;width:12px;height:12px;border-radius:2px;background:#667eea;margin-right:3px;}";
+    html += ".signal-bar.active{background:#4CAF50;}";
     html += "</style></head><body>";
     html += "<div class='container'>";
-    html += "<h1>" + String(PROJECT_NAME) + " v" + String(PROJECT_VERSION) + "</h1>";
+    html += "<div class='header'><h1>" + String(PROJECT_NAME) + "</h1><p>Version " + String(PROJECT_VERSION) + "</p></div>";
     
-    // Section Matériel
-    html += "<h2>⚡ Matériel</h2>";
-    html += "<div class='info info-cpu'><span class='label'>Board:</span><span class='value'>" + String(BOARD_NAME) + "</span></div>";
-    html += "<div class='info info-cpu'><span class='label'>Chip ID:</span><span class='value'>0x" + String(chipId, HEX) + "</span></div>";
-    html += "<div class='info info-cpu'><span class='label'>SDK Version:</span><span class='value'>" + String(ESP.getSdkVersion()) + "</span></div>";
-    html += "<div class='info info-cpu'><span class='label'>Fréquence CPU:</span><span class='value'>" + String(cpuFreq) + " MHz</span></div>";
-    html += "<div class='info info-cpu'><span class='label'>Nombre de cœurs:</span><span class='value'>2</span></div>";
+    html += "<div class='cards-grid'>";
     
-    // Section Mémoire Flash
-    html += "<h2>💾 Mémoire Flash</h2>";
-    html += "<div class='info info-mem'><span class='label'>Taille Flash:</span><span class='value'>" + String(flashSize / (1024 * 1024)) + " MB</span></div>";
-    html += "<div class='info info-mem'><span class='label'>Vitesse Flash:</span><span class='value'>" + String(flashSpeed) + " MHz</span></div>";
-    html += "<div class='info info-mem'><span class='label'>Mode Flash:</span><span class='value'>QIO</span></div>";
+    // CARTE 1: Matériel
+    html += "<div class='card'>";
+    html += "<div class='card-title'>⚡ Matériel</div>";
+    html += "<div class='card-item'><span class='card-label'>Board:</span><span class='card-value'>" + String(BOARD_NAME) + "</span></div>";
+    html += "<div class='card-item'><span class='card-label'>Chip ID:</span><span class='card-value mono'>0x" + String(chipId, HEX) + "</span></div>";
+    html += "<div class='card-item'><span class='card-label'>SDK:</span><span class='card-value'>" + String(ESP.getSdkVersion()) + "</span></div>";
+    html += "<div class='card-item'><span class='card-label'>CPU:</span><span class='card-value'>" + String(cpuFreq) + " MHz (2 cœurs)</span></div>";
+    html += "</div>";
     
-    // Section RAM
-    html += "<h2>📊 Mémoire RAM</h2>";
+    // CARTE 2: Mémoire Flash
+    html += "<div class='card'>";
+    html += "<div class='card-title'>💾 Flash</div>";
+    html += "<div class='card-item'><span class='card-label'>Taille:</span><span class='card-value'>" + String(flashSize / (1024 * 1024)) + " MB</span></div>";
+    html += "<div class='card-item'><span class='card-label'>Vitesse:</span><span class='card-value'>" + String(flashSpeed) + " MHz</span></div>";
+    html += "<div class='card-item'><span class='card-label'>Mode:</span><span class='card-value'>QIO</span></div>";
+    html += "</div>";
+    
+    // CARTE 3: RAM (Heap)
+    html += "<div class='card'>";
+    html += "<div class='card-title'>📊 RAM (Heap)</div>";
     uint32_t heapUsed = heapSize - freeHeap;
     float heapPercent = (float)heapUsed / heapSize * 100;
-    html += "<div class='info info-mem'>";
-    html += "<span class='label'>Heap:</span>";
-    html += "<span class='value'>" + String(freeHeap / 1024) + " KB libre / " + String(heapSize / 1024) + " KB (" + String(heapPercent, 1) + "% utilisé)</span>";
-    html += "</div>";
+    html += "<div class='card-item'><span class='card-label'>Total:</span><span class='card-value'>" + String(heapSize / 1024) + " KB</span></div>";
+    html += "<div class='card-item'><span class='card-label'>Libre:</span><span class='card-value'>" + String(freeHeap / 1024) + " KB</span></div>";
+    html += "<div class='progress-container'>";
+    html += "<div class='progress-label'><span>Utilisation</span><span>" + String(heapPercent, 1) + "%</span></div>";
     html += "<div class='progress-bar'><div class='progress-fill' style='width:" + String(heapPercent) + "%;'></div></div>";
+    html += "</div></div>";
     
+    // CARTE 4: PSRAM (si disponible)
     if(psramSize > 0) {
         uint32_t psramUsed = psramSize - freePsram;
         float psramPercent = (float)psramUsed / psramSize * 100;
-        html += "<div class='info info-mem' style='margin-top:10px;'>";
-        html += "<span class='label'>PSRAM:</span>";
-        html += "<span class='value'>" + String(freePsram / 1024) + " KB libre / " + String(psramSize / (1024 * 1024)) + " MB (" + String(psramPercent, 1) + "% utilisé)</span>";
-        html += "</div>";
+        html += "<div class='card'>";
+        html += "<div class='card-title'>🔋 PSRAM</div>";
+        html += "<div class='card-item'><span class='card-label'>Total:</span><span class='card-value'>" + String(psramSize / (1024 * 1024)) + " MB</span></div>";
+        html += "<div class='card-item'><span class='card-label'>Libre:</span><span class='card-value'>" + String(freePsram / 1024) + " KB</span></div>";
+        html += "<div class='progress-container'>";
+        html += "<div class='progress-label'><span>Utilisation</span><span>" + String(psramPercent, 1) + "%</span></div>";
         html += "<div class='progress-bar'><div class='progress-fill' style='width:" + String(psramPercent) + "%;'></div></div>";
+        html += "</div></div>";
     }
     
-    // Section WiFi
-    html += "<h2>📶 Réseau WiFi</h2>";
-    html += "<div class='info'><span class='label'>SSID:</span><span class='value'>" + WiFi.SSID() + "</span></div>";
-    html += "<div class='info'><span class='label'>Adresse IP:</span><span class='value'>" + WiFi.localIP().toString() + "</span></div>";
-    html += "<div class='info'><span class='label'>Masque:</span><span class='value'>" + WiFi.subnetMask().toString() + "</span></div>";
-    html += "<div class='info'><span class='label'>Passerelle:</span><span class='value'>" + WiFi.gatewayIP().toString() + "</span></div>";
-    html += "<div class='info'><span class='label'>DNS:</span><span class='value'>" + WiFi.dnsIP().toString() + "</span></div>";
-    html += "<div class='info'><span class='label'>MAC:</span><span class='value'>" + WiFi.macAddress() + "</span></div>";
-    html += "<div class='info'><span class='label'>Signal:</span><span class='value'>" + String(WiFi.RSSI()) + " dBm</span></div>";
+    // CARTE 5: WiFi
+    html += "<div class='card'>";
+    html += "<div class='card-title'>📶 Réseau WiFi</div>";
+    html += "<div class='card-item'><span class='card-label'>SSID:</span><span class='card-value'>" + WiFi.SSID() + "</span></div>";
+    html += "<div class='card-item'><span class='card-label'>IP:</span><span class='card-value mono'>" + WiFi.localIP().toString() + "</span></div>";
+    html += "<div class='card-item'><span class='card-label'>MAC:</span><span class='card-value mono'>" + WiFi.macAddress() + "</span></div>";
+    int rssi = WiFi.RSSI();
+    int signalPercent = (rssi + 100) * 2; // Approx -50dBm -> 100%, -100dBm -> 0%
+    signalPercent = (signalPercent > 100) ? 100 : (signalPercent < 0) ? 0 : signalPercent;
+    html += "<div class='card-item'><span class='card-label'>Signal:</span><span class='card-value'>" + String(rssi) + " dBm</span></div>";
+    html += "<div class='progress-container'>";
+    html += "<div class='progress-label'><span>Force signal</span><span>" + String(signalPercent) + "%</span></div>";
+    html += "<div class='progress-bar'><div class='progress-fill' style='width:" + String(signalPercent) + "%;'></div></div>";
+    html += "</div></div>";
     
-    // Section Système
-    html += "<h2>⏱️ Système</h2>";
-    html += "<div class='info'><span class='label'>Uptime:</span><span class='value'>" + String(millis() / 1000) + " secondes</span></div>";
-    html += "<div class='info'><span class='label'>Température CPU:</span><span class='value'>" + String(temperatureRead(), 1) + " °C</span></div>";
+    // CARTE 6: Système
+    html += "<div class='card'>";
+    html += "<div class='card-title'>⏱️ Système</div>";
+    unsigned long uptime = millis() / 1000;
+    unsigned long hours = uptime / 3600;
+    unsigned long minutes = (uptime % 3600) / 60;
+    unsigned long seconds = uptime % 60;
+    html += "<div class='card-item'><span class='card-label'>Uptime:</span><span class='card-value'>" + String(hours) + "h " + String(minutes) + "m " + String(seconds) + "s</span></div>";
+    html += "<div class='card-item'><span class='card-label'>Température:</span><span class='card-value'>" + String(temperatureRead(), 1) + " °C</span></div>";
+    html += "</div>";
+    
+    html += "</div>";  // Fin cards-grid
+    
+    // CARTE 7: Réseau Détaillé
+    html += "<div class='card'>";
+    html += "<div class='card-title'>🔗 Détails Réseau</div>";
+    html += "<div class='card-item'><span class='card-label'>Masque:</span><span class='card-value mono'>" + WiFi.subnetMask().toString() + "</span></div>";
+    html += "<div class='card-item'><span class='card-label'>Passerelle:</span><span class='card-value mono'>" + WiFi.gatewayIP().toString() + "</span></div>";
+    html += "<div class='card-item'><span class='card-label'>DNS:</span><span class='card-value mono'>" + WiFi.dnsIP().toString() + "</span></div>";
+    html += "</div>";
     
     // Boutons d'action
-    html += "<div style='margin-top:20px;text-align:center;'>";
-    html += "<button onclick='location.reload()'>Actualiser</button>";
-    html += "<button onclick='if(confirm(\"Red\u00e9marrer l\\\"ESP32 ?\")) fetch(\"/reboot\")' style='background:#FF5722;'>Red\u00e9marrer</button>";
-    html += "</div></div></body></html>";
+    html += "<div class='actions' style='margin-top:30px;'>";
+    html += "<button onclick='location.reload()'>🔄 Actualiser</button>";
+    html += "<button class='danger' onclick='if(confirm(\"Êtes-vous sûr de vouloir redémarrer ?\")) fetch(\"/reboot\")'>🔴 Redémarrer</button>";
+    html += "</div>";
+    
+    html += "</div></body></html>";
     
     server.send(200, "text/html", html);
     LOG_PRINTLN("Page web servie");
