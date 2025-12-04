@@ -5,6 +5,37 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.6.0] - 2025-12-04
+
+### Ajouté
+- 🏗️ **Architecture modulaire pour l'interface web** :
+  - `web_styles.h` : Styles CSS séparé et réutilisable
+  - `web_pages.h` : Générateur HTML avec fonction `generateDashboardPage()`
+  - `web_interface.h` : Handlers HTTP et gestion du serveur web
+- 📚 **Documentation Doxygen complète** : Tous les modules incluent des commentaires Doxygen
+- 🔧 **Meilleure séparation des responsabilités** : Logique métier séparée de la présentation
+- ♻️ **Code réutilisable** : Les fonctions HTML/CSS peuvent être réutilisées dans d'autres projets
+
+### Modifié
+- 🧹 **main.cpp allégé** : De 424 à 271 lignes (36% de réduction)
+- 🎯 **Imports simplifiés** : `#include "web_interface.h"` gère tous les besoins web
+- 🔄 **Handlers délégués** : `handleRoot()`, `handleReboot()` maintenant dans modules dédiés
+- ⚙️ **Fonction setup()** : Utilise maintenant `setupWebServer()` au lieu de config inline
+
+### Corrigé
+- 🐛 Organisation du code pour éviter la duplication
+- 📦 Réduction de l'empreinte du code binaire (moins en RAM, plus en Flash)
+
+### Documentation
+- 📂 **Réorganisation des fichiers de documentation** :
+  - Création du dossier `docs/` pour centraliser la documentation technique
+  - `docs/ARCHITECTURE.md` : Guide technique complet sur la structure modulaire
+  - `docs/UPGRADE_0.6.0.md` : Résumé des changements et étapes de migration
+  - `docs/COHERENCE_CHECK.md` : Vérification de cohérence des versions
+  - `docs/SYNTHESIS.md` : Synthèse complète avec comparaisons avant/après
+- 🎯 **Conformité aux conventions** : README.md et CHANGELOG.md restent à la racine, détails techniques en `docs/`
+- 🔗 **Références croisées** : Tous les fichiers utilisent des chemins relatifs pour portabilité
+
 ## [0.5.0] - 2025-12-04
 
 ### Ajouté
