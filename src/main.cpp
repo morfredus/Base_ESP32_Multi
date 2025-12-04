@@ -94,7 +94,7 @@ void setup() {
     // Config Bouton
     btn.attachClick(handleClick);
     btn.attachLongPressStart(handleLongPress);
-    btn.setPressTicks(1000); // Durée pour considérer un appui long (ms)
+    btn.setPressMs(1000); // Durée pour considérer un appui long (ms)
 
     setupWifi();
 }
