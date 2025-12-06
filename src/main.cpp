@@ -4,14 +4,12 @@
 #include <WebServer.h>
 #include <Adafruit_NeoPixel.h>
 #include <OneButton.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 
 #include "config.h"
 #include "board_config.h"
 #include "secrets.h"
 #include "web_interface.h"
+#include "display.h"
 
 // --- OBJETS ---
 WiFiMulti wifiMulti;
@@ -20,10 +18,6 @@ OneButton btn(PIN_BUTTON_BOOT, true); // true = Active Low (Bouton poussoir stan
 
 #ifdef HAS_NEOPIXEL
     Adafruit_NeoPixel pixels(NEOPIXEL_NUM, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
-#endif
-
-#ifdef HAS_OLED
-    Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_RESET);
 #endif
 
 // --- VARIABLES GLOBALES ---
@@ -36,71 +30,7 @@ bool ledState = false;
 // sont maintenant définies dans web_interface.h
 // Voir : include/web_interface.h
 
-// --- FONCTIONS OLED ---
-#ifdef HAS_OLED
-void setupOled() {
-    Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
-    
-    if(!display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR)) {
-        LOG_PRINTLN("Erreur: OLED non détecté !");
-        return;
-    }
-    
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(0, 0);
-    display.println(PROJECT_NAME);
-    display.println("v" + String(PROJECT_VERSION));
-    display.display();
-    LOG_PRINTLN("OLED initialisé avec succès");
-}
-
-void updateOledStatus(const char* status, int progress = -1) {
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setCursor(0, 0);
-    
-    // Titre
-    display.println(PROJECT_NAME);
-    display.println("v" + String(PROJECT_VERSION));
-    display.println();
-    
-    // Statut
-    display.println(status);
-    
-    // Barre de progression si demandée
-    if (progress >= 0 && progress <= 100) {
-        int barWidth = (OLED_WIDTH - 4) * progress / 100;
-        display.drawRect(0, 40, OLED_WIDTH, 10, SSD1306_WHITE);
-        display.fillRect(2, 42, barWidth, 6, SSD1306_WHITE);
-        display.setCursor(0, 52);
-        display.print(progress);
-        display.println("%");
-    }
-    
-    display.display();
-}
-
-void updateOledConnected(const char* ssid, IPAddress ip) {
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setCursor(0, 0);
-    
-    // Titre
-    display.println(PROJECT_NAME);
-    display.println("v" + String(PROJECT_VERSION));
-    display.println();
-    
-    // Infos WiFi
-    display.println("WiFi: " + String(ssid));
-    display.println();
-    display.print("IP: ");
-    display.println(ip);
-    
-    display.display();
-}
-#endif
+// Les fonctions d'affichage OLED et ST7789 sont maintenant dans display.h / display.cpp
 
 // --- CALLBACKS BOUTON ---
 
@@ -119,12 +49,22 @@ void handleLongPress() {
         pixels.show();
     #endif
     
-    #ifdef HAS_OLED
-        display.clearDisplay();
-        display.setTextSize(2);
-        display.setCursor(0, 20);
-        display.println("REBOOT...");
-        display.display();
+    #if defined(HAS_OLED) || defined(HAS_ST7789)
+        // Afficher message de redémarrage sur les écrans
+        #ifdef HAS_OLED
+            display_oled.clearDisplay();
+            display_oled.setTextSize(2);
+            display_oled.setCursor(0, 20);
+            display_oled.println("REBOOT...");
+            display_oled.display();
+        #endif
+        #ifdef HAS_ST7789
+            display_tft.fillScreen(COLOR_BLACK);
+            display_tft.setTextSize(3);
+            display_tft.setTextColor(COLOR_RED);
+            display_tft.setCursor(50, 100);
+            display_tft.println("REBOOT...");
+        #endif
     #endif
     
     delay(1000); // Pause pour afficher le message
@@ -142,9 +82,8 @@ void setupWifi() {
 
     LOG_PRINT("Connexion WiFi en cours...");
     
-    #ifdef HAS_OLED
-        updateOledStatus("Connexion WiFi...", 0);
-    #endif
+    // Affichage initial sur les écrans
+    displayWifiProgress(0);
     
     #ifdef HAS_NEOPIXEL
         pixels.setPixelColor(0, pixels.Color(50, 50, 0)); // Jaune
@@ -160,9 +99,8 @@ void setupWifi() {
         attempts++;
         int progress = (attempts * 100) / maxAttempts;
         
-        #ifdef HAS_OLED
-            updateOledStatus("Connexion WiFi...", progress);
-        #endif
+        // Mise à jour de la progression sur les écrans
+        displayWifiProgress(progress);
         
         LOG_PRINT(".");
     }
@@ -172,9 +110,8 @@ void setupWifi() {
         LOG_PRINT("SSID: "); LOG_PRINTLN(WiFi.SSID());
         LOG_PRINT("IP: "); LOG_PRINTLN(WiFi.localIP());
         
-        #ifdef HAS_OLED
-            updateOledConnected(WiFi.SSID().c_str(), WiFi.localIP());
-        #endif
+        // Affichage des infos de connexion sur les écrans
+        displayWifiConnected(WiFi.SSID().c_str(), WiFi.localIP());
         
         #ifdef HAS_NEOPIXEL
             pixels.setPixelColor(0, pixels.Color(0, 50, 0)); // Vert
@@ -182,9 +119,7 @@ void setupWifi() {
         #endif
     } else {
         LOG_PRINTLN(" Echec !");
-        #ifdef HAS_OLED
-            updateOledStatus("WiFi: Echec", 100);
-        #endif
+        displayWifiFailed();
     }
 }
 
@@ -197,10 +132,9 @@ void setup() {
     LOG_PRINTF("Board: %s\n", BOARD_NAME);
     LOG_PRINTF("Version: %s\n", PROJECT_VERSION);
 
-    // Init OLED
-    #ifdef HAS_OLED
-        setupOled();
-    #endif
+    // Init écrans (OLED et/ou ST7789)
+    setupDisplays();
+    displayStartup(PROJECT_NAME, PROJECT_VERSION);
 
     // Init NeoPixel
     #ifdef HAS_NEOPIXEL
@@ -225,10 +159,7 @@ void setup() {
     // Démarrage Serveur Web
     if(WiFi.status() == WL_CONNECTED) {
         setupWebServer();  // Module délégué dans web_interface.h
-        
-        #ifdef HAS_OLED
-            delay(2000); // Laisser le temps de voir l'IP
-        #endif
+        delay(3000); // Laisser le temps de voir l'IP sur les écrans
     }
 }
 

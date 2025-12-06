@@ -1,7 +1,7 @@
 # Base_ESP32_S3
 
 Template de démarrage universel pour projets ESP32 et ESP32-S3 sous PlatformIO.
-Inclut la gestion automatique du WiFi, une structure multi-environnements et le support des LED de statut (NeoPixel) et écrans OLED.
+Inclut la gestion automatique du WiFi, une structure multi-environnements et le support des LED de statut (NeoPixel), écrans OLED et écrans TFT couleur.
 
 ## 🚀 Fonctionnalités
 * **Multi-Cartes** : Prêt pour ESP32-S3 (N16R8, N8R8) et ESP32 Classic (DevKitC).
@@ -9,9 +9,12 @@ Inclut la gestion automatique du WiFi, une structure multi-environnements et le 
 * **Serveur Web Modulaire** *(v0.6.0)* : Interface web moderne avec architecture modulaire - styles CSS séparé, générateur HTML flexible, handlers organisés. Accessible sur http://[IP_ESP32].
 * **Sécurité** : Les identifiants WiFi sont exclus de Git (`secrets.h`).
 * **Feedback Visuel** : Gestion automatique de la LED RGB (Pin 48 sur S3) pour indiquer l'état WiFi (Jaune=Connexion, Vert=OK, Rouge=Erreur).
-* **Affichage OLED** : Support des écrans SSD1306 128x64 avec affichage du nom du projet, version, progression de connexion WiFi, SSID et adresse IP.
+* **Affichage Dual-Screen** *(v0.7.0)* : Support simultané OLED SSD1306 (128x64) et TFT ST7789 (240x240 couleur) avec interface unifiée.
+  - Affichage du nom du projet et version au démarrage
+  - Barre de progression de connexion WiFi
+  - SSID et adresse IP une fois connecté
 * **Bouton Intelligent** : Appui long (1s) redémarre l'ESP32 avec confirmation visuelle.
-* **Structure Propre** : Séparation de la config projet (`config.h`) et du mapping hardware (`board_config.h`).
+* **Structure Propre** : Séparation de la config projet (`config.h`), mapping hardware (`board_config.h`) et gestion d'affichage (`display.h`).
 
 ## 🛠️ Installation & Démarrage
 
@@ -35,20 +38,41 @@ const char* WIFI_NETWORKS[][2] = {
 #endif
 ```
 
-### 3. Configurer l'OLED (optionnel)
-Si vous utilisez un écran OLED SSD1306, le support est activé par défaut dans `include/config.h`.
+### 3. Configurer les écrans (optionnel)
+Les écrans OLED et ST7789 sont activés par défaut dans `include/config.h`.
 
-**Connexion I2C :**
-- **ESP32-S3** : SDA=GPIO42, SCL=GPIO41
-- **ESP32 Classic** : SDA=GPIO21, SCL=GPIO22
-- **Adresse I2C** : 0x3C (par défaut, modifiable dans `config.h`)
+#### 📍 Connexion des écrans
 
-**Affichage automatique :**
-- Nom du projet et version au démarrage
-- Barre de progression durant la connexion WiFi
-- SSID et adresse IP une fois connecté
+Pour obtenir les schémas de connexion détaillés et les tableaux GPIO complets, consultez :
+**→ [docs/PIN_MAPPING.md](./docs/PIN_MAPPING.md)** 
 
-Pour désactiver l'OLED, commentez `#define HAS_OLED` dans `config.h`.
+Guide complet incluant :
+- Tableaux récapitulatifs des GPIO pour ESP32-S3 et ESP32 Classic
+- Schémas de câblage (ASCII art)
+- Conseils de dépannage
+- Configuration I2C vs SPI
+
+#### ⚙️ Configuration logicielle
+
+Dans `include/config.h`, vous pouvez activer/désactiver les écrans :
+
+```cpp
+// OLED SSD1306 (I2C)
+#define HAS_OLED          // Décommenter pour activer
+
+// TFT ST7789 (SPI couleur)
+#define HAS_ST7789        // Décommenter pour activer
+```
+
+**Note** : Vous pouvez utiliser les deux écrans simultanément !
+
+#### Affichage automatique
+- **Au démarrage** : Nom du projet et version
+- **Connexion WiFi** : Barre de progression (0-100%)
+- **Connecté** : SSID du réseau et adresse IP attribuée
+- **Erreur** : Message d'échec de connexion
+
+Pour désactiver un écran, commentez simplement sa ligne `#define` dans `config.h`.
 
 ## 🏗️ Architecture Modulaire (v0.6.0+)
 
@@ -62,6 +86,13 @@ Le projet utilise une architecture modulaire pour l'interface web, séparant les
 | **Pages** | `include/web_pages.h` | Générateur HTML avec fonction `generateDashboardPage()` |
 | **Interface** | `include/web_interface.h` | Handlers HTTP et configuration du serveur web |
 
+### Modules d'Affichage (v0.7.0+)
+
+| Module | Fichier | Responsabilité |
+|--------|---------|-----------------|
+| **Display** | `include/display.h` | Interface unifiée pour OLED et ST7789 |
+| **Display Impl** | `src/display.cpp` | Implémentation des fonctions d'affichage |
+
 ### Avantages de cette architecture
 
 - ✅ **Modularité** : Chaque module a une responsabilité unique
@@ -74,13 +105,15 @@ Le projet utilise une architecture modulaire pour l'interface web, séparant les
 
 ```cpp
 // main.cpp
-#include "web_interface.h"  // Importe automatiquement web_pages.h et web_styles.h
+#include "display.h"  // Interface d'affichage unifiée
 
 // Setup
-setupWebServer();  // Initialise toutes les routes HTTP
+setupDisplays();      // Initialise OLED et/ou ST7789
+displayStartup(PROJECT_NAME, PROJECT_VERSION);  // Écran de démarrage
 
-// Dans la loop
-server.handleClient();  // Gère les requêtes HTTP
+// Loop
+displayWifiProgress(progress);  // Pendant la connexion WiFi
+displayWifiConnected(ssid, ip);  // Une fois connecté
 ```
 
 **Pour en savoir plus** : Voir [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
@@ -91,10 +124,9 @@ Pour consulter l'historique complet des versions et modifications, voir [CHANGEL
 
 **Documentation technique** : Consultez [docs/](./docs) pour les guides détaillés et références techniques.
 
-### Version actuelle : v0.6.0 (2025-12-04)
+### Version actuelle : v0.7.0 (2025-12-06)
 **Nouveautés principales :**
-- 🏗️ **Architecture modulaire** : Séparation en modules dédiés (CSS, HTML, handlers)
-- 📚 **Code documenté** : Commentaires Doxygen complets pour tous les modules
-- 🧹 **Code allégé** : main.cpp réduit de 36% grâce à la modularisation
-- ♻️ **Réutilisabilité** : Composants web peuvent être intégrés dans d'autres projets
-- 🎯 **Meilleure maintenabilité** : Logique métier séparée de la présentation
+- 🖥️ **Support TFT ST7789** : Écrans couleur haute résolution 240x240
+- 🎨 **Module display.h** : Interface unifiée pour OLED + ST7789
+- 📚 **Documentation PIN_MAPPING** : Guide complet de connexion des pins (débutants)
+- 🎯 **Interface graphique** : Affichage du nom, version, progression WiFi, IP sur les écrans

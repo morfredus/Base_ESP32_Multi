@@ -5,6 +5,41 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.7.0] - 2025-12-06
+
+### Ajouté
+- 🖥️ **Support complet des écrans TFT ST7789** : Affichage couleur haute résolution (240x240 ou 240x135)
+- 📱 **Module display.h/display.cpp** : Architecture modulaire pour gérer OLED et ST7789 de manière unifiée
+- 🎨 **Interface de démarrage graphique** :
+  - Affichage du nom du projet et de la version au boot
+  - Barre de progression visuelle durant la connexion WiFi
+  - Affichage du SSID et de l'adresse IP une fois connecté
+  - Messages d'erreur en cas d'échec de connexion
+- 📚 **Documentation complète pour débutants** :
+  - `docs/PIN_MAPPING.md` : Guide détaillé de connexion des composants
+  - Schémas de câblage pour ESP32-S3 et ESP32 Classic
+  - Tableaux récapitulatifs des GPIO utilisés
+  - Conseils de dépannage et sécurité électrique
+- ⚙️ **Configuration flexible** :
+  - Support simultané OLED + ST7789
+  - Activation/désactivation indépendante via `config.h`
+  - Palette de couleurs prédéfinies (RGB565) pour ST7789
+
+### Modifié
+- 🎨 **main.cpp refactorisé** : Fonctions d'affichage déléguées au module `display.h`
+- 🔧 **Simplification des includes** : Suppression des includes OLED directs dans main.cpp
+- 📦 **platformio.ini** : Activation de la bibliothèque Adafruit ST7789
+- 📏 **Amélioration de board_config.h** : Ajout de commentaires explicatifs pour chaque pin
+
+### Corrigé
+- 🐛 Gestion cohérente de l'affichage entre OLED et ST7789
+- 🐛 Message de redémarrage affiché sur tous les écrans disponibles
+
+### Documentation
+- 📘 Ajout de `docs/PIN_MAPPING.md` : Guide complet de connexion matérielle
+- 📝 Commentaires Doxygen dans `display.h` pour tous les prototypes
+- ✅ Liste de vérification pré-compilation pour débutants
+
 ## [0.6.0] - 2025-12-04
 
 ### Ajouté
