@@ -1,35 +1,39 @@
 # Base_ESP32_S3
 
-Template de démarrage universel pour projets ESP32 et ESP32-S3 sous PlatformIO.
-Inclut la gestion automatique du WiFi, une structure multi-environnements et le support des LED de statut (NeoPixel), écrans OLED et écrans TFT couleur.
+Universal starter template for ESP32 and ESP32-S3 projects on PlatformIO.
+Includes automatic WiFi management, multi-environment structure, and support for status LEDs (NeoPixel), OLED displays, and color TFT screens.
 
-## 🚀 Fonctionnalités
-* **Multi-Cartes** : Prêt pour ESP32-S3 (N16R8, N8R8) et ESP32 Classic (DevKitC).
-* **WiFiMulti** : Tente de se connecter à une liste de réseaux connus.
-* **Serveur Web Modulaire** *(v0.6.0)* : Interface web moderne avec architecture modulaire - styles CSS séparé, générateur HTML flexible, handlers organisés. Accessible sur http://[IP_ESP32].
-* **Sécurité** : Les identifiants WiFi sont exclus de Git (`secrets.h`).
-* **Feedback Visuel** : Gestion automatique de la LED RGB (Pin 48 sur S3) pour indiquer l'état WiFi (Jaune=Connexion, Vert=OK, Rouge=Erreur).
-* **Affichage Dual-Screen** *(v0.7.0)* : Support simultané OLED SSD1306 (128x64) et TFT ST7789 (240x240 couleur) avec interface unifiée.
-  - Affichage du nom du projet et version au démarrage
-  - Barre de progression de connexion WiFi
-  - SSID et adresse IP une fois connecté
-* **Système de boutons avancé** *(v0.8.0)* :
-  - **Bouton BOOT** : Reboot avec barre de progression 2 sec (annulable avant 100%)
-  - **Bouton 1** : Cycle RGB (Rouge → Vert → Bleu → Blanc → Éteint)
-  - **Bouton 2** : Bip Buzzer à l'appui (feedback sonore)
-* **NeoPixel intelligente** *(v0.8.0)* : 
-  - Violet fixe pendant redémarrage
-  - Vert heartbeat quand WiFi connecté
-  - Rouge heartbeat quand WiFi en recherche/déconnecté
-* **Structure Propre** : Séparation de la config projet (`config.h`), mapping hardware (`board_config.h`) et gestion d'affichage (`display.h`).
+**Current version: 0.8.2**
 
-## 🛠️ Installation & Démarrage
+**[Version Française](README_FR.md)**
 
-### 1. Cloner le projet
-Récupérez ce dossier et renommez-le selon votre nouveau projet.
+## 🚀 Features
+* **Multi-Board Support**: Ready for ESP32-S3 (N16R8, N8R8) and ESP32 Classic (DevKitC).
+* **WiFiMulti**: Attempts to connect to a list of known networks.
+* **Modular Web Server** *(v0.6.0)*: Modern web interface with modular architecture - separate CSS styles, flexible HTML generator, organized handlers. Accessible at http://[ESP32_IP].
+* **Security**: WiFi credentials are excluded from Git (`secrets.h`).
+* **Visual Feedback**: Automatic RGB LED management (Pin 48 on S3) to indicate WiFi status (Yellow=Connecting, Green=OK, Red=Error).
+* **Dual-Screen Display** *(v0.7.0)*: Simultaneous support for OLED SSD1306 (128x64) and TFT ST7789 (240x240 color) with unified interface.
+  - Display project name and version at startup
+  - WiFi connection progress bar
+  - SSID and IP address once connected
+* **Advanced Button System** *(v0.8.0)*:
+  - **BOOT Button**: Reboot with 2-second progress bar (cancellable before 100%)
+  - **Button 1**: RGB Cycle (Red → Green → Blue → White → Off)
+  - **Button 2**: Buzzer beep on press (sound feedback)
+* **Smart NeoPixel** *(v0.8.0)*: 
+  - Fixed violet during restart
+  - Green heartbeat when WiFi connected
+  - Red heartbeat when WiFi searching/disconnected
+* **Clean Structure**: Separation of project config (`config.h`), hardware mapping (`board_config.h`), and display management (`display.h`).
 
-### 2. Créer le fichier `secrets.h`
-Le fichier `include/secrets.h` est ignoré par Git. Vous devez le créer manuellement :
+## 🛠️ Installation & Getting Started
+
+### 1. Clone the Project
+Get this folder and rename it according to your new project.
+
+### 2. Create `secrets.h` File
+The `include/secrets.h` file is ignored by Git. You must create it manually:
 
 ```cpp
 // include/secrets.h
@@ -37,103 +41,131 @@ Le fichier `include/secrets.h` est ignoré par Git. Vous devez le créer manuell
 #define SECRETS_H
 
 const char* WIFI_NETWORKS[][2] = {
-    {"SSID_Maison", "MotDePasse123"},
-    {"SSID_Bureau", "MotDePasse456"},
-    {"Partage_Tel", "12345678"}
+    {"Home_SSID", "Password123"},
+    {"Office_SSID", "Password456"},
+    {"Phone_Hotspot", "12345678"}
 };
 
 #endif
 ```
 
-### 3. Configurer les écrans (optionnel)
-Les écrans OLED et ST7789 sont activés par défaut dans `include/config.h`.
+### 3. Configure Displays (Optional)
+OLED and ST7789 displays are enabled by default in `include/config.h`.
 
-#### 📍 Connexion des écrans
+#### 📍 Display Connections
 
-Pour obtenir les schémas de connexion détaillés et les tableaux GPIO complets, consultez :
-**→ [docs/PIN_MAPPING.md](./docs/PIN_MAPPING.md)** 
+For detailed connection diagrams and complete GPIO tables, see:
+**→ [docs/PIN_MAPPING.md](docs/PIN_MAPPING.md)** 
 
-Guide complet incluant :
-- Tableaux récapitulatifs des GPIO pour ESP32-S3 et ESP32 Classic
-- Schémas de câblage (ASCII art)
-- Conseils de dépannage
-- Configuration I2C vs SPI
+Complete guide including:
+- GPIO summary tables for ESP32-S3 and ESP32 Classic
+- Wiring diagrams (ASCII art)
+- Troubleshooting tips
+- I2C vs SPI configuration
 
-#### ⚙️ Configuration logicielle
+#### ⚙️ Software Configuration
 
-Dans `include/config.h`, vous pouvez activer/désactiver les écrans :
+In `include/config.h`, you can enable/disable displays:
 
 ```cpp
 // OLED SSD1306 (I2C)
-#define HAS_OLED          // Décommenter pour activer
+#define HAS_OLED          // Uncomment to enable
 
-// TFT ST7789 (SPI couleur)
-#define HAS_ST7789        // Décommenter pour activer
+// TFT ST7789 (SPI color)
+#define HAS_ST7789        // Uncomment to enable
 ```
 
-**Note** : Vous pouvez utiliser les deux écrans simultanément !
+**Note**: You can use both displays simultaneously!
 
-#### Affichage automatique
-- **Au démarrage** : Nom du projet et version
-- **Connexion WiFi** : Barre de progression (0-100%)
-- **Connecté** : SSID du réseau et adresse IP attribuée
-- **Erreur** : Message d'échec de connexion
+#### Automatic Display
+- **At startup**: Project name and version
+- **WiFi connection**: Progress bar (0-100%)
+- **Connected**: Network SSID and assigned IP address
+- **Error**: Connection failure message
 
-Pour désactiver un écran, commentez simplement sa ligne `#define` dans `config.h`.
+To disable a display, simply comment out its `#define` line in `config.h`.
 
-## 🏗️ Architecture Modulaire (v0.6.0+)
+## 🏗️ Modular Architecture (v0.6.0+)
 
-Le projet utilise une architecture modulaire pour l'interface web, séparant les responsabilités :
+The project uses a modular architecture for the web interface, separating responsibilities:
 
-### Modules Web
+### Web Modules
 
-| Module | Fichier | Responsabilité |
-|--------|---------|-----------------|
-| **Styles** | `include/web_styles.h` | Contient tout le CSS réutilisable (flexbox, gradients, animations) |
-| **Pages** | `include/web_pages.h` | Générateur HTML avec fonction `generateDashboardPage()` |
-| **Interface** | `include/web_interface.h` | Handlers HTTP et configuration du serveur web |
+| Module | File | Responsibility |
+|--------|------|----------------|
+| **Styles** | `include/web_styles.h` | Contains all reusable CSS (flexbox, gradients, animations) |
+| **Pages** | `include/web_pages.h` | HTML generator with `generateDashboardPage()` function |
+| **Interface** | `include/web_interface.h` | HTTP handlers and web server configuration |
 
-### Modules d'Affichage (v0.7.0+)
+### Display Modules (v0.7.0+)
 
-| Module | Fichier | Responsabilité |
-|--------|---------|-----------------|
-| **Display** | `include/display.h` | Interface unifiée pour OLED et ST7789 |
-| **Display Impl** | `src/display.cpp` | Implémentation des fonctions d'affichage |
+| Module | File | Responsibility |
+|--------|------|----------------|
+| **Display** | `include/display.h` | Unified interface for OLED and ST7789 |
+| **Display Impl** | `src/display.cpp` | Implementation of display functions |
 
-### Avantages de cette architecture
+### Advantages of This Architecture
 
-- ✅ **Modularité** : Chaque module a une responsabilité unique
-- ✅ **Réutilisabilité** : Les styles et générateurs peuvent être utilisés dans d'autres projets
-- ✅ **Maintenabilité** : Modifications faciles sans affecter le reste du code
-- ✅ **Testabilité** : Chaque module peut être testé indépendamment
-- ✅ **Documentation** : Code Doxygen pour tous les modules
+- ✅ **Modularity**: Each module has a single responsibility
+- ✅ **Reusability**: Styles and generators can be used in other projects
+- ✅ **Maintainability**: Easy modifications without affecting the rest of the code
+- ✅ **Testability**: Each module can be tested independently
+- ✅ **Documentation**: Doxygen code for all modules
 
-### Exemple d'utilisation
+### Usage Example
 
 ```cpp
 // main.cpp
-#include "display.h"  // Interface d'affichage unifiée
+#include "display.h"  // Unified display interface
 
 // Setup
-setupDisplays();      // Initialise OLED et/ou ST7789
-displayStartup(PROJECT_NAME, PROJECT_VERSION);  // Écran de démarrage
+setupDisplays();      // Initialize OLED and/or ST7789
+displayStartup(PROJECT_NAME, PROJECT_VERSION);  // Startup screen
 
 // Loop
-displayWifiProgress(progress);  // Pendant la connexion WiFi
-displayWifiConnected(ssid, ip);  // Une fois connecté
+displayWifiProgress(progress);  // During WiFi connection
+displayWifiConnected(ssid, ip);  // Once connected
 ```
 
-**Pour en savoir plus** : Voir [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+**Learn more**: See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ## 📋 Changelog
 
-Pour consulter l'historique complet des versions et modifications, voir [CHANGELOG.md](CHANGELOG.md).
+For complete version history and modifications, see [CHANGELOG.md](CHANGELOG.md) or [CHANGELOG_FR.md](CHANGELOG_FR.md) (French).
 
-**Documentation technique** : Consultez [docs/](./docs) pour les guides détaillés et références techniques.
+**Technical documentation**: See [docs/](docs/) for detailed guides and technical references.
 
-### Version actuelle : v0.7.0 (2025-12-06)
-**Nouveautés principales :**
-- 🖥️ **Support TFT ST7789** : Écrans couleur haute résolution 240x240
-- 🎨 **Module display.h** : Interface unifiée pour OLED + ST7789
-- 📚 **Documentation PIN_MAPPING** : Guide complet de connexion des pins (débutants)
-- 🎯 **Interface graphique** : Affichage du nom, version, progression WiFi, IP sur les écrans
+### Current Version: v0.8.2 (2025-12-13)
+**What's New in v0.8.2 (Optimization):**
+- ⚡ **Hardware SPI for TFT**: Using hardware SPI for better performance
+- 🎨 **Adafruit Colors**: Replaced `COLOR_*` with official `ST77XX_*` constants
+
+**What's New in v0.8.1:**
+- 🔧 **Pin Name Consistency**: All pin names normalized with `PIN_` prefix
+- 📋 **board_config.h as single reference** for all project pin names
+
+**What's New in v0.8.0:**
+- 🎮 **Advanced Button System**: BOOT (reboot), BTN1 (RGB), BTN2 (Buzzer)
+- 🎨 **Smart NeoPixel**: Indicates WiFi and reboot status
+- 🔊 **Sound Feedback**: Piezo buzzer
+
+## 📚 Documentation
+
+All documentation is available in the `docs/` folder in both French and English:
+- [docs/INDEX.md](docs/INDEX.md) - Documentation index
+- [docs/PIN_MAPPING.md](docs/PIN_MAPPING.md) - Complete pin mapping guide
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Software architecture
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit pull requests or open issues.
+
+## 📜 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+**Project Version**: 0.8.2  
+**Last Update**: December 13, 2025  
+**Compatible Boards**: ESP32-S3 DevKitC-1 (N16R8, N8R8), ESP32 Classic DevKitC

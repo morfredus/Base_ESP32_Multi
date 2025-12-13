@@ -1,8 +1,8 @@
 /**
  * @file display.h
  * @brief Module de gestion centralisée des écrans (OLED et ST7789)
- * @version 0.7.0
- * @date 2025-12-06
+ * @version 0.8.2
+ * @date 2025-12-13
  * 
  * Ce module fournit une interface unifiée pour gérer l'affichage
  * sur les écrans OLED (SSD1306) et TFT couleur (ST7789).

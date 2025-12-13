@@ -67,9 +67,9 @@ void handleLongPress() {
         
         #ifdef HAS_ST7789
             // Afficher barre de progression pendant 2 secondes
-            display_tft.fillScreen(COLOR_BLACK);
+            display_tft.fillScreen(ST77XX_BLACK);
             display_tft.setTextSize(3);
-            display_tft.setTextColor(COLOR_RED);
+            display_tft.setTextColor(ST77XX_RED);
             
             int16_t x1, y1;
             uint16_t w, h;
@@ -110,20 +110,20 @@ void handleLongPress() {
                 int progress = (elapsed * 100) / progressDuration;
                 
                 // Efface la zone de la barre
-                display_tft.fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 20, COLOR_BLACK);
+                display_tft.fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 20, ST77XX_BLACK);
                 
                 // Contour de la barre
-                display_tft.drawRect(barX, barY, barWidth, barHeight, COLOR_WHITE);
+                display_tft.drawRect(barX, barY, barWidth, barHeight, ST77XX_WHITE);
                 
                 // Remplissage de la progression
                 int fillWidth = (barWidth - 4) * progress / 100;
                 if (fillWidth > 0) {
-                    display_tft.fillRect(barX + 2, barY + 2, fillWidth, barHeight - 4, COLOR_MAGENTA);
+                    display_tft.fillRect(barX + 2, barY + 2, fillWidth, barHeight - 4, ST77XX_MAGENTA);
                 }
                 
                 // Pourcentage
                 display_tft.setTextSize(2);
-                display_tft.setTextColor(COLOR_WHITE);
+                display_tft.setTextColor(ST77XX_WHITE);
                 String percentStr = String(progress) + "%";
                 display_tft.getTextBounds(percentStr.c_str(), 0, 0, &x1, &y1, &w, &h);
                 centerX = (ST7789_WIDTH - w) / 2;
@@ -202,13 +202,13 @@ void handleButton2PressStart() {
     LOG_PRINTLN(">> Bouton 2 appuyé ! Bip buzzer...");
     
     // Émettre un bip : pulse le buzzer à 1000 Hz pendant 100ms
-    tone(DEFAULT_BUZZER_PIN, 1000, 100);
+    tone(PIN_BUZZER, 1000, 100);
 }
 
 // Arrêt appui Bouton 2
 void handleButton2PressStop() {
     // Arrêter le bip si encore actif
-    noTone(DEFAULT_BUZZER_PIN);
+    noTone(PIN_BUZZER);
 }
 
 // --- FONCTIONS WIFI ---
@@ -301,8 +301,8 @@ void setup() {
     #endif
 
     // Init Buzzer
-    pinMode(DEFAULT_BUZZER_PIN, OUTPUT);
-    digitalWrite(DEFAULT_BUZZER_PIN, LOW); // Éteint au démarrage
+    pinMode(PIN_BUZZER, OUTPUT);
+    digitalWrite(PIN_BUZZER, LOW); // Éteint au démarrage
 
     // Config Bouton BOOT
     btn.attachClick(handleClick);

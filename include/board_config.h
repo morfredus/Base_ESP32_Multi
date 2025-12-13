@@ -64,12 +64,12 @@
 // TFT ST7789 (SPI)
 // ------------------------------------
 // Configuration de l'écran couleur (TFT) utilisant le protocole SPI.
-#define TFT_MOSI              11  // SPI MOSI (Master Out Slave In) : Broche de données vers l'écran. Câblage direct.
-#define TFT_SCLK              12  // SPI Clock (Horloge) : Broche de synchronisation. Câblage direct.
-#define TFT_CS                10  // Chip Select : Broche pour activer spécifiquement cet écran. Câblage direct.
-#define TFT_DC                9   // Data/Command : Broche pour indiquer si les données sont des pixels ou une commande. Câblage direct.
-#define TFT_RST               13  // Reset écran. Pull-up/down selon librairie.
-#define TFT_BL                7   // Backlight (Rétroéclairage) : Souvent utilisé avec le PWM pour ajuster la luminosité.
+#define PIN_TFT_MOSI              11  // SPI MOSI (Master Out Slave In) : Broche de données vers l'écran. Câblage direct.
+#define PIN_TFT_SCLK              12  // SPI Clock (Horloge) : Broche de synchronisation. Câblage direct.
+#define PIN_TFT_CS                10  // Chip Select : Broche pour activer spécifiquement cet écran. Câblage direct.
+#define PIN_TFT_DC                9   // Data/Command : Broche pour indiquer si les données sont des pixels ou une commande. Câblage direct.
+#define PIN_TFT_RST               13  // Reset écran. Pull-up/down selon librairie.
+#define PIN_TFT_BL                7   // Backlight (Rétroéclairage) : Souvent utilisé avec le PWM pour ajuster la luminosité.
 
 // ------------------------------------
 // I2C
@@ -93,7 +93,7 @@
 #define PIN_LED_RED 21 // Rouge. Résistance série **220O - 470O**.
 #define PIN_LED_GREEN 41 // Vert. Résistance série **220O - 470O**.
 #define PIN_LED_BLUE 42 // Bleu. Résistance série **220O - 470O**.
-#define NEOPIXEL_PIN          48 // NeoPixel Intégrée. Data (Réservée).
+#define PIN_NEOPIXEL 48 // NeoPixel Intégrée. Data (Réservée).
 
 // ------------------------------------
 // Boutons
@@ -105,17 +105,17 @@
 // ------------------------------------
 // Capteurs & Sorties
 // ------------------------------------
-#define DEFAULT_PWM_PIN       20  // PWM générique. Résistance série **220O - 470O** si LED.
-#define DEFAULT_BUZZER_PIN    6   // Buzzer. Transistor + **Résistance base 1–10kO**.
-#define DEFAULT_DHT_PIN       5   // DHT. **Pull-Up 10kO vers 3.3V**.
-#define DEFAULT_MOTION_SENSOR_PIN 46 // PIR. Câblage direct. **(Potentiel JTAG - attention au boot).**
-#define DEFAULT_LIGHT_SENSOR_PIN 4  // LDR. **Diviseur ~10kO**.
+#define PIN_PWM       20  // PWM générique. Résistance série **220O - 470O** si LED.
+#define PIN_BUZZER    6   // Buzzer. Transistor + **Résistance base 1–10kO**.
+#define PIN_DHT       5   // DHT. **Pull-Up 10kO vers 3.3V**.
+#define PIN_MOTION_SENSOR 46 // PIR. Câblage direct. **(Potentiel JTAG - attention au boot).**
+#define PIN_LIGHT_SENSOR 4  // LDR. **Diviseur ~10kO**.
 
 // ------------------------------------
 // Capteurs de Distance
 // ------------------------------------
-#define DEFAULT_DISTANCE_TRIG_PIN 2  // HC-SR04 TRIG. Câblage direct.
-#define DEFAULT_DISTANCE_ECHO_PIN 35 // HC-SR04 ECHO. **Si 5V, ajouter Diviseur de tension OBLIGATOIRE.**
+#define PIN_DISTANCE_TRIG 2  // HC-SR04 TRIG. Câblage direct.
+#define PIN_DISTANCE_ECHO 35 // HC-SR04 ECHO. **Si 5V, ajouter Diviseur de tension OBLIGATOIRE.**
 
 
 // =========================================================
@@ -166,12 +166,12 @@
 // ------------------------------------
 // TFT ST7789 (SPI)
 // ------------------------------------
-#define TFT_SCLK              18  // SPI Clock. Câblage direct.
-#define TFT_MOSI              23  // SPI MOSI. Câblage direct.
-#define TFT_CS                27  // Chip Select. Câblage direct.
-#define TFT_DC                14  // Data/Command. Câblage direct.
-#define TFT_RST               25  // Reset écran. Pull-up/down selon librairie.
-#define TFT_BL                32  // Backlight (PWM). Câblage direct (PWM).
+#define PIN_TFT_SCLK              18  // SPI Clock. Câblage direct.
+#define PIN_TFT_MOSI              23  // SPI MOSI. Câblage direct.
+#define PIN_TFT_CS                27  // Chip Select. Câblage direct.
+#define PIN_TFT_DC                14  // Data/Command. Câblage direct.
+#define PIN_TFT_RST               25  // Reset écran. Pull-up/down selon librairie.
+#define PIN_TFT_BL                32  // Backlight (PWM). Câblage direct (PWM).
 
 // ------------------------------------
 // I2C
@@ -190,30 +190,31 @@
 // ------------------------------------
 // LED RGB
 // ------------------------------------
-#define PIN_LED_RED 13  // Rouge. Résistance série **220O - 470O**.
-#define PIN_LED_GREEN 26  // Vert. Résistance série **220O - 470O**.
-#define PIN_LED_BLUE 33  // Bleu. Résistance série **220O - 470O**.
+#define PIN_LED_RED 13         // Rouge. Résistance série **220Ω - 470Ω**.
+#define PIN_LED_GREEN 26       // Vert. Résistance série **220Ω - 470Ω**.
+#define PIN_LED_BLUE 33        // Bleu. Résistance série **220Ω - 470Ω**.
+#define PIN_LED_BUILTIN 2      // LED Builtin (si existante)
 
 // ------------------------------------
 // Boutons
 // ------------------------------------
 #define PIN_BUTTON_BOOT       0   // Bouton BOOT (strap). Réservé au boot, ne pas utiliser comme bouton utilisateur.
-#define PIN_BUTTON_1          2   // Bouton vers GND. Utiliser **Pull-Up interne**.
-#define PIN_BUTTON_2          5   // Bouton vers GND. Utiliser **Pull-Up interne**.
+#define PIN_BUTTON_1          5   // Bouton vers GND. Utiliser **Pull-Up interne**.
+#define PIN_BUTTON_2          12  // Bouton vers GND. Utiliser **Pull-Up interne**.
 
 // ------------------------------------
 // Capteurs & Sorties
 // ------------------------------------
-#define DEFAULT_PWM_PIN       4   // PWM générique. Résistance série **220O - 470O** si LED.
-#define DEFAULT_BUZZER_PIN    19  // Buzzer. Transistor + **Résistance base 1–10kO**.
-#define DEFAULT_DHT_PIN       15  // DHT. **Pull-Up 10kO vers 3.3V**.
-#define DEFAULT_LIGHT_SENSOR_PIN 39 // LDR. Entrée seule. **Diviseur ~10kO**.
+#define PIN_PWM       4           // PWM générique. Résistance série **220O - 470O** si LED.
+#define PIN_BUZZER    19          // Buzzer. Transistor + **Résistance base 1–10kO**.
+#define PIN_DHT       15          // DHT. **Pull-Up 10kO vers 3.3V**.
+#define PIN_LIGHT_SENSOR 39       // LDR. Entrée seule. **Diviseur ~10kO**.
 
 // ------------------------------------
 // Capteurs de Distance
 // ------------------------------------
-#define DEFAULT_DISTANCE_TRIG_PIN 12 // HC-SR04 TRIG. Sortie. (Déplacé de 32).
-#define DEFAULT_DISTANCE_ECHO_PIN 35 // HC-SR04 ECHO. Entrée seule. **Si 5V, Diviseur de tension OBLIGATOIRE.**
+#define PIN_DISTANCE_TRIG 1  // HC-SR04 TRIG. Sortie. (Déplacé de 32).
+#define PIN_DISTANCE_ECHO 35 // HC-SR04 ECHO. Entrée seule. **Si 5V, Diviseur de tension OBLIGATOIRE.**
 
 #else
     #error "Aucune cible definie ! Verifiez platformio.ini (TARGET_ESP32_...)"

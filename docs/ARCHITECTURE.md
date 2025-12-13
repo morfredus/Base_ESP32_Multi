@@ -1,45 +1,47 @@
-# 📚 Architecture Modulaire - Guide de Référence (v0.6.0+)
+# 📚 Modular Architecture - Reference Guide (v0.6.0+)
 
-## Vue d'ensemble
+**[Version Française](ARCHITECTURE_FR.md)**
 
-À partir de la version 0.6.0, l'interface web est organisée en modules séparés pour améliorer :
-- **Maintenabilité** : Code plus lisible et facile à modifier
-- **Réutilisabilité** : Composants utilisables dans d'autres projets
-- **Scalabilité** : Ajout facile de nouvelles pages/routes
-- **Documentation** : Code Doxygen complet
+## Overview
 
-## Structure des modules
+Starting from version 0.6.0, the web interface is organized into separate modules to improve:
+- **Maintainability**: More readable and easy-to-modify code
+- **Reusability**: Components usable in other projects
+- **Scalability**: Easy addition of new pages/routes
+- **Documentation**: Complete Doxygen code
 
-### 1. `include/web_styles.h` - Feuille de styles CSS
-**Responsabilité** : Contenir tous les styles CSS pour l'interface web
+## Module Structure
+
+### 1. `include/web_styles.h` - CSS Stylesheet
+**Responsibility**: Contains all CSS styles for the web interface
 
 ```cpp
 #include "web_styles.h"
 
-// Accès à : const char* WEB_STYLES
+// Access to: const char* WEB_STYLES
 String html = "<style>" + String(WEB_STYLES) + "</style>";
 ```
 
-**Contient** :
-- Reset CSS (`*` sélecteur)
-- Layout responsive (Grid, Flexbox)
-- Composants (cards, buttons, progress bars)
-- Animations et transitions
+**Contains**:
+- CSS Reset (`*` selector)
+- Responsive layout (Grid, Flexbox)
+- Components (cards, buttons, progress bars)
+- Animations and transitions
 
-**Avantages** :
-- ✅ CSS centralisé et facilement modifiable
-- ✅ Peut être minifié/compressé pour économiser la mémoire
-- ✅ Réutilisable dans plusieurs pages HTML
+**Advantages**:
+- ✅ Centralized and easily modifiable CSS
+- ✅ Can be minified/compressed to save memory
+- ✅ Reusable across multiple HTML pages
 
 ---
 
-### 2. `include/web_pages.h` - Générateur de pages HTML
-**Responsabilité** : Générer le contenu HTML de l'interface web
+### 2. `include/web_pages.h` - HTML Page Generator
+**Responsibility**: Generate HTML content for the web interface
 
 ```cpp
 #include "web_pages.h"
 
-// Fonction disponible :
+// Available function:
 String html = generateDashboardPage(
     chipId, flashSize, flashSpeed,
     heapSize, freeHeap,
@@ -48,24 +50,24 @@ String html = generateDashboardPage(
 );
 ```
 
-**Contient** :
-- Fonction `generateDashboardPage()` - Génère la page complète du tableau de bord
-- Inclusions des styles via `web_styles.h`
-- Logique de calcul des pourcentages d'utilisation
+**Contains**:
+- `generateDashboardPage()` function - Generates complete dashboard page
+- Style inclusion via `web_styles.h`
+- Usage percentage calculation logic
 
-**Avantages** :
-- ✅ Génération HTML paramétrisée et flexible
-- ✅ Facile d'ajouter de nouvelles cartes/sections
-- ✅ Séparation entre données et présentation
+**Advantages**:
+- ✅ Parameterized and flexible HTML generation
+- ✅ Easy to add new cards/sections
+- ✅ Separation between data and presentation
 
-**Extensibilité** :
+**Extensibility**:
 ```cpp
-// Ajouter une nouvelle fonction dans web_pages.h :
+// Add a new function in web_pages.h:
 String generateStatusPage(const char* status) {
-    // Retourner HTML personnalisé
+    // Return custom HTML
 }
 
-// Puis utiliser dans handleStatus() dans web_interface.h
+// Then use in handleStatus() in web_interface.h
 void handleStatus() {
     String html = generateStatusPage("Connected");
     server.send(200, "text/html", html);
@@ -74,32 +76,32 @@ void handleStatus() {
 
 ---
 
-### 3. `include/web_interface.h` - Handlers et configuration serveur
-**Responsabilité** : Gérer les routes HTTP et les callbacks du serveur web
+### 3. `include/web_interface.h` - Handlers and Server Configuration
+**Responsibility**: Manage HTTP routes and web server callbacks
 
 ```cpp
-#include "web_interface.h"  // Inclut automatiquement web_pages.h et web_styles.h
+#include "web_interface.h"  // Automatically includes web_pages.h and web_styles.h
 
-// Fonctions disponibles :
+// Available functions:
 void handleRoot();           // GET /
 void handleReboot();         // GET /reboot
 void handleNotFound();       // 404
-void setupWebServer();       // Initialiser les routes
+void setupWebServer();       // Initialize routes
 ```
 
-**Contient** :
-- `handleRoot()` - Génère et envoie la page d'accueil
-- `handleReboot()` - Gère les redémarrages
-- `handleNotFound()` - Gestion des pages non trouvées
-- `setupWebServer()` - Configure toutes les routes
+**Contains**:
+- `handleRoot()` - Generates and sends homepage
+- `handleReboot()` - Handles reboots
+- `handleNotFound()` - Handles missing pages
+- `setupWebServer()` - Configures all routes
 
-**Dépendances** :
-- Utilise `generateDashboardPage()` depuis `web_pages.h`
-- Accède à `server` (variable globale depuis `main.cpp`)
+**Dependencies**:
+- Uses `generateDashboardPage()` from `web_pages.h`
+- Accesses `server` (global variable from `main.cpp`)
 
 ---
 
-## Diagramme de dépendances
+## Dependency Diagram
 
 ```
 main.cpp
@@ -109,7 +111,7 @@ main.cpp
        └── extern WebServer server
 ```
 
-## Workflow d'une requête HTTP
+## HTTP Request Workflow
 
 ```
 Client -> GET / 
@@ -127,11 +129,11 @@ Client <- HTML + CSS + JS
 
 ---
 
-## Comment ajouter une nouvelle page/route
+## How to Add a New Page/Route
 
-### Exemple : Ajouter une page `/api/status`
+### Example: Adding a `/api/status` page
 
-**1. Créer la fonction génératrice dans `web_pages.h`** :
+**1. Create generator function in `web_pages.h`**:
 ```cpp
 String generateStatusJson() {
     String json = "{";
@@ -142,7 +144,7 @@ String generateStatusJson() {
 }
 ```
 
-**2. Créer le handler dans `web_interface.h`** :
+**2. Create handler in `web_interface.h`**:
 ```cpp
 void handleStatus() {
     String json = generateStatusJson();
@@ -150,72 +152,157 @@ void handleStatus() {
 }
 ```
 
-**3. Enregistrer la route dans `setupWebServer()`** :
+**3. Register route in `setupWebServer()`**:
 ```cpp
 void setupWebServer() {
     server.on("/", handleRoot);
     server.on("/reboot", handleReboot);
-    server.on("/api/status", handleStatus);  // ← Ajouter ici
+    server.on("/api/status", handleStatus);  // NEW
     server.onNotFound(handleNotFound);
-    server.begin();
-    LOG_PRINTLN("Serveur web démarré sur http://" + WiFi.localIP().toString());
 }
 ```
 
-**4. Utiliser dans `main.cpp`** :
+**4. Call in `main.cpp`**:
 ```cpp
-// Pas besoin de modification ! setupWebServer() gère tout
+void setup() {
+    setupWebServer();
+    server.begin();
+}
 ```
 
 ---
 
-## Bonnes pratiques
+## Best Practices
 
-### 📏 Taille des modules
-- `web_styles.h` : ~2-3 KB (CSS minifié)
-- `web_pages.h` : ~5-10 KB (HTML généré dynamiquement)
-- `web_interface.h` : ~2-3 KB (Handlers et config)
+### ✅ DO
+- Keep HTML generation in `web_pages.h`
+- Keep HTTP handlers in `web_interface.h`
+- Keep CSS in `web_styles.h`
+- Document functions with Doxygen comments
+- Test each new route independently
 
-### 🔒 Sécurité
-- Les données sensibles (WiFi, secrets) ne passent pas par le web
-- Validation des inputs non implémentée (à ajouter si nécessaire)
-- Redémarrage demande une confirmation via `confirm()` en JS
-
-### 📱 Responsiveness
-- Grille CSS auto-responsive : `grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))`
-- Mobile-first design avec media queries si nécessaire
-- Tests sur navigateurs mobile recommandés
-
-### ⚡ Optimisations possibles
-- Minifier le CSS pour réduire la taille
-- Compresser le HTML généré
-- Ajouter du caching HTTP
-- Servir des assets statiques (CSS/JS external) si stockage disponible
+### ❌ DON'T
+- Put HTML code in `main.cpp`
+- Mix presentation and business logic
+- Hardcode values (use parameters)
+- Forget to update documentation when adding features
 
 ---
 
-## Dépannage
+## Benefits of Modular Architecture
 
-| Problème | Solution |
-|----------|----------|
-| Page 404 | Vérifier `server.on()` dans `setupWebServer()` |
-| CSS ne s'applique pas | Vérifier `#include "web_styles.h"` dans web_pages.h |
-| Mémoire insuffisante | Réduire la taille des cartes ou utiliser des handlers pour des pages séparées |
-| IP non accessible | Vérifier WiFi connecté avant `setupWebServer()` |
+### Before v0.6.0 (Monolithic)
+```cpp
+// main.cpp (424 lines)
+void handleRoot() {
+    String html = "<!DOCTYPE html>...";
+    html += "<style>...";  // 50 lines
+    html += "<body>...";   // 200 lines
+    server.send(200, "text/html", html);
+}
+```
+
+**Problems**:
+- ❌ Difficult to maintain
+- ❌ Impossible to reuse
+- ❌ Mixed concerns
+- ❌ Difficult testing
+
+### After v0.6.0 (Modular)
+```cpp
+// main.cpp (271 lines)
+#include "web_interface.h"
+
+void setup() {
+    setupWebServer();
+}
+```
+
+**Benefits**:
+- ✅ **-36% lines** in main.cpp
+- ✅ Clean separation of concerns
+- ✅ Reusable modules
+- ✅ Easy testing
+- ✅ Simple maintenance
 
 ---
 
-## Version
+## Testing New Routes
 
-**Modulaire depuis** : v0.6.0 (2025-12-04)
+### Manual Test
+1. Compile and upload code
+2. Open browser to `http://ESP32_IP/`
+3. Navigate to new route
+4. Verify HTML/JSON display
+5. Check Serial logs
 
-**Fichiers impliqués** :
-- ✅ `include/web_styles.h` - Créé en v0.6.0
-- ✅ `include/web_pages.h` - Créé en v0.6.0
-- ✅ `include/web_interface.h` - Créé en v0.6.0
-- ✅ `src/main.cpp` - Refactorisé en v0.6.0 (424 → 271 lignes)
-- ✅ `docs/ARCHITECTURE.md` - Guide déplacé et amélioré
+### Automated Test (future)
+```cpp
+// test/test_web_interface.cpp
+#include <unity.h>
+#include "web_pages.h"
+
+void test_generate_dashboard() {
+    String html = generateDashboardPage("123", 4, 40, 520, 300, 0, 0, 240);
+    TEST_ASSERT_TRUE(html.indexOf("<!DOCTYPE html>") == 0);
+    TEST_ASSERT_TRUE(html.indexOf("ESP32-S3") > 0);
+}
+```
 
 ---
 
-Pour plus d'informations sur la structure générale du projet, voir [README.md](../README.md).
+## Migration from v0.5.0 to v0.6.0
+
+### Before (v0.5.0)
+```cpp
+// main.cpp
+void handleRoot() {
+    String html = "<!DOCTYPE html>";
+    html += "<head><style>";
+    html += "body { background: #0a0e27; }";
+    // ... 200 lines ...
+    server.send(200, "text/html", html);
+}
+
+void setup() {
+    server.on("/", handleRoot);
+    server.on("/reboot", handleReboot);
+    server.begin();
+}
+```
+
+### After (v0.6.0)
+```cpp
+// main.cpp
+#include "web_interface.h"
+
+void setup() {
+    setupWebServer();  // All routes configured here
+    server.begin();
+}
+```
+
+**Migration Guide**: See [docs/UPGRADE_0.6.0.md](UPGRADE_0.6.0.md)
+
+---
+
+## Module Responsibilities Summary
+
+| Module | File | Lines | Responsibility |
+|--------|------|-------|---------------|
+| **Styles** | `web_styles.h` | 220 | CSS centralization |
+| **Pages** | `web_pages.h` | 130 | HTML generation |
+| **Interface** | `web_interface.h` | 90 | HTTP handlers |
+| **Main** | `main.cpp` | 271 | Application logic |
+
+**Total web code**: 440 lines (previously 300 lines in main.cpp)  
+**Gain**: +140 lines but separated into 3 reusable modules
+
+---
+
+## Further Reading
+
+- [UPGRADE_0.6.0.md](UPGRADE_0.6.0.md) - Migration guide
+- [COHERENCE_CHECK.md](COHERENCE_CHECK.md) - Version consistency
+- [SYNTHESIS.md](SYNTHESIS.md) - Complete v0.6.0 summary
+- [PIN_MAPPING.md](PIN_MAPPING.md) - Hardware wiring

@@ -1,285 +1,287 @@
-# 📋 Vérification de cohérence - v0.8.0
+# 📋 Consistency Check - v0.8.2
 
-## ✅ Cohérence des numéros de version
+**[Version Française](COHERENCE_CHECK_FR.md)**
 
-| Fichier | Élément | Version | Status |
-|---------|---------|---------|--------|
-| `platformio.ini` | Commentaire en-tête | 0.8.0 | ✅ |
-| `platformio.ini` | `PROJECT_VERSION` | 0.8.0 | ✅ |
-| `README.md` | Section "Fonctionnalités" | v0.8.0 | ✅ |
-| `README.md` | Système multi-boutons | v0.8.0 | ✅ |
-| `CHANGELOG.md` | Dernière entrée | [0.8.0] | ✅ |
-| `CHANGES_v0.8.0.md` | Version | 0.8.0 | ✅ |
+## ✅ Version Number Consistency
+
+| File | Element | Version | Status |
+|------|---------|---------|--------|
+| `platformio.ini` | Header comment | 0.8.2 | ✅ |
+| `platformio.ini` | `PROJECT_VERSION` | 0.8.2 | ✅ |
+| `README.md` | "Features" section | v0.8.0 | ✅ |
+| `README.md` | Multi-button system | v0.8.0 | ✅ |
+| `CHANGELOG.md` | Latest entry | [0.8.2] | ✅ |
+| `docs/CHANGES_v0.8.2.md` | Version | 0.8.2 | ✅ |
+| `docs/CHANGES_v0.8.1.md` | Version | 0.8.1 | ✅ |
 | `docs/UPGRADE_0.8.0.md` | Version | 0.8.0 | ✅ |
-| Code compilé | Accessible via `PROJECT_VERSION` | 0.8.0 | ✅ |
-| Git Tag | Référence | v0.8.0 | ✅ |
+| Compiled code | Accessible via `PROJECT_VERSION` | 0.8.2 | ✅ |
+| Git Tag | Reference | v0.8.2 | ✅ |
 
 ---
 
-## ✅ Configuration Hardware
+## ✅ Hardware Configuration
 
-| Composant | Pin (S3) | Pin (Classic) | Status | Défini dans |
-|-----------|----------|---------------|--------|-------------|
-| Bouton BOOT | 0 | 0 | ✅ | board_config.h |
-| Bouton 1 | 38 | 2 | ✅ | board_config.h |
-| Bouton 2 | 39 | 5 | ✅ | board_config.h |
-| LED RGB Red | 21 | 13 | ✅ | board_config.h |
-| LED RGB Green | 41 | 26 | ✅ | board_config.h |
-| LED RGB Blue | 42 | 33 | ✅ | board_config.h |
+| Component | Pin (S3) | Pin (Classic) | Status | Defined in |
+|-----------|----------|---------------|--------|------------|
+| BOOT Button | 0 | 0 | ✅ | board_config.h |
+| Button 1 | 38 | 2 | ✅ | board_config.h |
+| Button 2 | 39 | 5 | ✅ | board_config.h |
+| RGB LED Red | 21 | 13 | ✅ | board_config.h |
+| RGB LED Green | 41 | 26 | ✅ | board_config.h |
+| RGB LED Blue | 42 | 33 | ✅ | board_config.h |
 | NeoPixel | 48 | (N/A) | ✅ | board_config.h |
 | Buzzer | 6 | 19 | ✅ | board_config.h |
 
 ---
 
-## ✅ Activation dans config.h
+## ✅ Activation in config.h
 
-| Définition | Statut | Ligne | Impact |
-|-----------|--------|-------|--------|
-| `HAS_LED_RGB` | ✅ Activé | 35 | LED RGB controllée |
-| `HAS_NEOPIXEL` | ✅ Activé | 38 | NeoPixel affichée |
-| `NEOPIXEL_NUM` | ✅ Activé | 39 | 1 pixel |
-| `HAS_OLED` | ✅ Activé | 25 | Écran OLED |
-| `HAS_ST7789` | ✅ Activé | 42 | Écran TFT |
-| `ENABLE_DEBUG_LOG` | ✅ Activé | 11 | Logs série |
+| Definition | Status | Line | Impact |
+|-----------|--------|------|--------|
+| `HAS_LED_RGB` | ✅ Enabled | 35 | RGB LED controlled |
+| `HAS_NEOPIXEL` | ✅ Enabled | 38 | NeoPixel displayed |
+| `NEOPIXEL_NUM` | ✅ Enabled | 39 | 1 pixel |
+| `HAS_OLED` | ✅ Enabled | 25 | OLED screen |
+| `HAS_ST7789` | ✅ Enabled | 42 | TFT screen |
+| `ENABLE_DEBUG_LOG` | ✅ Enabled | 11 | Serial logs |
 
 ---
 
-## ✅ Variables globales
+## ✅ Global Variables
 
-| Variable | Type | Ligne | Initialisation | Usage |
-|----------|------|-------|-----------------|-------|
+| Variable | Type | Line | Initialization | Usage |
+|----------|------|------|----------------|-------|
 | `btn` | OneButton | 17 | Constructor | BOOT |
 | `btn1` | OneButton | 18 | Constructor | RGB |
 | `btn2` | OneButton | 19 | Constructor | Buzzer |
-| `pixels` | NeoPixel | 21-22 | Constructor | LED adressable |
+| `pixels` | NeoPixel | 21-22 | Constructor | Addressable LED |
 | `previousMillis` | unsigned long | 26 | 0 | Timing |
 | `ledState` | bool | 27 | false | Heartbeat |
-| `isRebooting` | bool | 28 | false | **Nouveau v0.8.0** |
-| `rgbState` | int | 31 | 0 | **Nouveau v0.8.0** |
+| `isRebooting` | bool | 28 | false | **New v0.8.0** |
+| `rgbState` | int | 31 | 0 | **New v0.8.0** |
 
 ---
 
-## ✅ Callbacks OneButton
+## ✅ OneButton Callbacks
 
-| Callback | Bouton | Événement | Fonction |
-|----------|--------|-----------|----------|
-| `handleClick()` | BOOT | Clic simple | Non utilisé (réservé) |
-| `handleLongPress()` | BOOT | Appui long 1s | **Modifié v0.8.0** |
-| `handleButton1Click()` | BTN1 | Clic simple | **Nouveau v0.8.0** |
-| `handleButton2PressStart()` | BTN2 | Appui détecté | **Nouveau v0.8.0** |
-| `handleButton2PressStop()` | BTN2 | Relâchement | **Nouveau v0.8.0** |
-
----
-
-## ✅ Documentation utilisateur
-
-| Document | Localisation | Statut | Contenu | Mis à jour |
-|----------|--------------|--------|---------|------------|
-| `README.md` | `/` (racine) | ✅ | Installation + Fonctionnalités v0.8.0 | ✅ v0.8.0 |
-| `CHANGELOG.md` | `/` (racine) | ✅ | Historique jusqu'à v0.8.0 | ✅ v0.8.0 |
-| `CHANGES_v0.8.0.md` | `/` (racine) | ✅ **NOUVEAU** | 10 changements numérotés | ✅ Créé |
-| `docs/ARCHITECTURE.md` | `/docs` | ✅ | Guide architecture web (v0.6.0+) | - |
-| `docs/UPGRADE_0.6.0.md` | `/docs` | ✅ | Résumé v0.6.0 | - |
-| `docs/UPGRADE_0.8.0.md` | `/docs` | ✅ **NOUVEAU** | Migration v0.8.0 avec checklist | ✅ Créé |
-| `docs/SYNTHESIS.md` | `/docs` | ✅ | Synthèse v0.6.0 | - |
-| `docs/COHERENCE_CHECK.md` | `/docs` | ✅ | Vérification cohérence | ✅ v0.8.0 |
-| `docs/PIN_MAPPING.md` | `/docs` | ✅ | Tableaux GPIO + câblage | - |
+| Callback | Button | Event | Function |
+|----------|--------|-------|----------|
+| `handleClick()` | BOOT | Single click | Not used (reserved) |
+| `handleLongPress()` | BOOT | Long press 1s | **Modified v0.8.0** |
+| `handleButton1Click()` | BTN1 | Single click | **New v0.8.0** |
+| `handleButton2PressStart()` | BTN2 | Press detected | **New v0.8.0** |
+| `handleButton2PressStop()` | BTN2 | Release | **New v0.8.0** |
 
 ---
 
-## ✅ Comportements v0.8.0
+## ✅ User Documentation
 
-### Bouton BOOT (Pin 0)
+| Document | Location | Status | Content | Updated |
+|----------|----------|--------|---------|---------|
+| `README.md` | `/` (root) | ✅ | Installation + Features v0.8.0 | ✅ v0.8.0 |
+| `CHANGELOG.md` | `/` (root) | ✅ | History up to v0.8.0 | ✅ v0.8.0 |
+| `CHANGES_v0.8.0.md` | `/` (root) | ✅ **NEW** | 10 numbered changes | ✅ Created |
+| `docs/ARCHITECTURE.md` | `/docs` | ✅ | Web architecture guide (v0.6.0+) | - |
+| `docs/UPGRADE_0.6.0.md` | `/docs` | ✅ | v0.6.0 summary | - |
+| `docs/UPGRADE_0.8.0.md` | `/docs` | ✅ **NEW** | v0.8.0 migration with checklist | ✅ Created |
+| `docs/SYNTHESIS.md` | `/docs` | ✅ | v0.6.0 synthesis | - |
+| `docs/COHERENCE_CHECK.md` | `/docs` | ✅ | Consistency check | ✅ v0.8.0 |
+| `docs/PIN_MAPPING.md` | `/docs` | ✅ | GPIO tables + wiring | - |
 
-```
-Appui < 1 sec      → Rien
-Appui 1-2 sec      → Barre progression + Violet NeoPixel
-├─ Relâche avant 100% → Annulation + Écran restauré
-└─ Maintien jusqu'à 100% → Redémarrage ESP32
-```
+---
 
-**Vérification** :
-- ✅ `handleLongPress()` appelée après 1s
-- ✅ Boucle vérifie `digitalRead(PIN_BUTTON_BOOT)` toutes les 50ms
-- ✅ Si bouton relâché → `isRebooting = false` + restauration écran
-- ✅ Si barre 100% → `ESP.restart()` si `isRebooting` true
+## ✅ v0.8.0 Behaviors
 
-### Bouton 1 (Pin 38 - S3 / Pin 2 - Classic)
-
-```
-Clic → Cycle : Rouge → Vert → Bleu → Blanc → Éteint → Rouge
-```
-
-**Vérification** :
-- ✅ `handleButton1Click()` appelée à chaque clic
-- ✅ `rgbState` cycle 0→1→2→3→4→0
-- ✅ Logs affichent état courant
-- ✅ LED RGB change d'état immédiatement
-
-### Bouton 2 (Pin 39 - S3 / Pin 5 - Classic)
+### BOOT Button (Pin 0)
 
 ```
-Appui → Bip (1kHz, 100ms) → Relâchement → Stop
+Press < 1 sec      → Nothing
+Press 1-2 sec      → Progress bar + Purple NeoPixel
+├─ Release before 100% → Canceled + Screen restored
+└─ Hold until 100% → ESP32 reboot
 ```
 
-**Vérification** :
-- ✅ `attachLongPressStart()` avec délai 50ms
-- ✅ `tone(DEFAULT_BUZZER_PIN, 1000, 100)` émis immédiatement
-- ✅ `noTone()` appelé au relâchement
-- ✅ Logs affichent "Bouton 2 appuyé"
+**Verification**:
+- ✅ `handleLongPress()` called after 1s
+- ✅ Loop checks `digitalRead(PIN_BUTTON_BOOT)` every 50ms
+- ✅ If button released → `isRebooting = false` + screen restoration
+- ✅ If bar 100% → `ESP.restart()` if `isRebooting` true
+
+### Button 1 (Pin 38 - S3 / Pin 2 - Classic)
+
+```
+Click → Cycle: Red → Green → Blue → White → Off → Red
+```
+
+**Verification**:
+- ✅ `handleButton1Click()` called on each click
+- ✅ `rgbState` cycles 0→1→2→3→4→0
+- ✅ Logs display current state
+- ✅ RGB LED changes state immediately
+
+### Button 2 (Pin 39 - S3 / Pin 5 - Classic)
+
+```
+Press → Beep (1kHz, 100ms) → Release → Stop
+```
+
+**Verification**:
+- ✅ `attachLongPressStart()` with 50ms delay
+- ✅ `tone(DEFAULT_BUZZER_PIN, 1000, 100)` emitted immediately
+- ✅ `noTone()` called on release
+- ✅ Logs display "Button 2 pressed"
 
 ### NeoPixel (Pin 48 - S3)
 
 ```
-WiFi connecté     → Vert heartbeat (100/20 intensity)
-WiFi déconnecté   → Rouge heartbeat (100/20 intensity)
-Reboot en cours   → Violet fixe (128/0/128)
+WiFi connected     → Green heartbeat (100/20 intensity)
+WiFi disconnected  → Red heartbeat (100/20 intensity)
+Rebooting         → Purple solid (128/0/128)
 ```
 
-**Vérification** :
-- ✅ Condition `if (!isRebooting)` vérifie état reboot
-- ✅ Heartbeat chaque 1s dans `loop()`
-- ✅ Violet maintenu pendant reboot
-- ✅ Restauration automatique après annulation
+**Verification**:
+- ✅ Condition `if (!isRebooting)` checks reboot state
+- ✅ Heartbeat every 1s in `loop()`
+- ✅ Purple maintained during reboot
+- ✅ Automatic restoration after cancellation
 
 ---
 
 ## ✅ Compilation
 
-| Métrique | Valeur | Status |
-|----------|--------|--------|
-| Flash utilisée | 25.3% (795765/3145728 bytes) | ✅ OK |
-| RAM utilisée | 14.1% (46272/327680 bytes) | ✅ OK |
-| Erreurs | 0 | ✅ OK |
-| Avertissements | 0 | ✅ OK |
-| Temps compilation | 64.96 sec | ✅ OK |
+| Metric | Value | Status |
+|--------|-------|--------|
+| Flash used | 25.3% (795765/3145728 bytes) | ✅ OK |
+| RAM used | 14.1% (46272/327680 bytes) | ✅ OK |
+| Errors | 0 | ✅ OK |
+| Warnings | 0 | ✅ OK |
+| Build time | 64.96 sec | ✅ OK |
 
 ---
 
 ## ✅ Git / GitHub
 
-| Élément | Valeur | Status |
-|---------|--------|--------|
-| Commit | `ac2d9fb` | ✅ Poussé |
-| Message | Détaillé v0.8.0 | ✅ OK |
-| Branch | `main` | ✅ À jour |
-| Tag | `v0.8.0` | ✅ Créé et poussé |
-| Remote | github.com/morfredus/Base_ESP32_S3 | ✅ Synchronisé |
+| Element | Value | Status |
+|---------|-------|--------|
+| Commit | `ac2d9fb` | ✅ Pushed |
+| Message | Detailed v0.8.0 | ✅ OK |
+| Branch | `main` | ✅ Up to date |
+| Tag | `v0.8.0` | ✅ Created and pushed |
+| Remote | github.com/morfredus/Base_ESP32_S3 | ✅ Synchronized |
 
 ---
 
-## 🎯 Résumé
+## 🎯 Summary
 
-**v0.8.0** est **cohérent et prêt pour production** ✅
+**v0.8.0** is **consistent and production-ready** ✅
 
-- ✅ Toutes les versions alignées
-- ✅ Configuration hardware complète
-- ✅ Tous les callbacks implémentés
-- ✅ Documentation à jour
-- ✅ Compilation sans erreurs
-- ✅ Git synchronisé avec GitHub
-
-
----
-
-## ✅ Documentation utilisateur
-
-| Document | Localisation | Statut | Contenu |
-|----------|--------------|--------|---------|
-| `README.md` | `/` (racine) | ✅ À jour | Installation + Architecture |
-| `CHANGELOG.md` | `/` (racine) | ✅ À jour | Historique jusqu'à v0.6.0 |
-| `docs/ARCHITECTURE.md` | `/docs` | ✅ Nouveau | Guide détaillé architecture web |
-| `docs/UPGRADE_0.6.0.md` | `/docs` | ✅ Nouveau | Résumé changements + checklist |
-| `docs/COHERENCE_CHECK.md` | `/docs` | ✅ Nouveau | Vérification de cohérence |
-| `docs/SYNTHESIS.md` | `/docs` | ✅ Nouveau | Synthèse complète v0.6.0 |
+- ✅ All versions aligned
+- ✅ Complete hardware configuration
+- ✅ All callbacks implemented
+- ✅ Documentation up to date
+- ✅ Compilation without errors
+- ✅ Git synchronized with GitHub
 
 ---
 
-## ✅ Cohérence des descriptions
+## ✅ User Documentation
 
-### Dans README.md (Fonctionnalités)
+| Document | Location | Status | Content |
+|----------|----------|--------|---------|
+| `README.md` | `/` (root) | ✅ Up to date | Installation + Architecture |
+| `CHANGELOG.md` | `/` (root) | ✅ Up to date | History up to v0.6.0 |
+| `docs/ARCHITECTURE.md` | `/docs` | ✅ New | Detailed web architecture guide |
+| `docs/UPGRADE_0.6.0.md` | `/docs` | ✅ New | Changes summary + checklist |
+| `docs/COHERENCE_CHECK.md` | `/docs` | ✅ New | Consistency verification |
+| `docs/SYNTHESIS.md` | `/docs` | ✅ New | Complete v0.6.0 synthesis |
+
+---
+
+## ✅ Description Consistency
+
+### In README.md (Features)
 
 ```markdown
-✅ "Serveur Web Modulaire (v0.6.0)"
-   - Architecture modulaire ✅
-   - Styles CSS séparé ✅
-   - Générateur HTML flexible ✅
-   - Handlers organisés ✅
+✅ "Modular Web Server (v0.6.0)"
+   - Modular architecture ✅
+   - Separate CSS styles ✅
+   - Flexible HTML generator ✅
+   - Organized handlers ✅
 ```
 
-### Dans CHANGELOG.md (v0.6.0)
+### In CHANGELOG.md (v0.6.0)
 
 ```markdown
-✅ Architecture modulaire pour l'interface web ✅
-✅ web_styles.h - Styles CSS séparé ✅
-✅ web_pages.h - Générateur HTML ✅
-✅ web_interface.h - Handlers HTTP ✅
-✅ Documentation Doxygen complète ✅
-✅ main.cpp allégé (424 → 271 lignes) ✅
+✅ Modular architecture for web interface ✅
+✅ web_styles.h - Separate CSS styles ✅
+✅ web_pages.h - HTML generator ✅
+✅ web_interface.h - HTTP handlers ✅
+✅ Complete Doxygen documentation ✅
+✅ main.cpp streamlined (424 → 271 lines) ✅
 ```
 
-### Dans main.cpp
+### In main.cpp
 
 ```cpp
 ✅ #include "web_interface.h"
-✅ setupWebServer() appelée dans setup()
-✅ Commentaire sur modules délégu
-✅ Pas de code HTML/CSS directement dans le fichier
+✅ setupWebServer() called in setup()
+✅ Comment about delegated modules
+✅ No HTML/CSS code directly in file
 ```
 
 ---
 
-## ✅ Structure des fichiers
+## ✅ File Structure
 
 ```
 Base_ESP32_S3/
 ├── include/
-│   ├── config.h                    (Configuration générale)
-│   ├── board_config.h              (Mapping hardware)
-│   ├── secrets.h                   (WiFi - non versionné)
+│   ├── config.h                    (General configuration)
+│   ├── board_config.h              (Hardware mapping)
+│   ├── secrets.h                   (WiFi - not versioned)
 │   ├── web_styles.h                (v0.6.0)
 │   ├── web_pages.h                 (v0.6.0)
 │   └── web_interface.h             (v0.6.0)
 │
 ├── src/
-│   └── main.cpp                    (Refactorisé v0.6.0)
+│   └── main.cpp                    (Refactored v0.6.0)
 │
 ├── docs/
-│   ├── ARCHITECTURE.md             (Guide technique web)
-│   ├── UPGRADE_0.6.0.md           (Résumé changements)
-│   ├── COHERENCE_CHECK.md         (Vérification)
-│   └── SYNTHESIS.md               (Synthèse complète)
+│   ├── ARCHITECTURE.md             (Web technical guide)
+│   ├── UPGRADE_0.6.0.md           (Changes summary)
+│   ├── COHERENCE_CHECK.md         (Verification)
+│   └── SYNTHESIS.md               (Complete synthesis)
 │
-├── platformio.ini                  (Mis à jour v0.6.0)
-├── README.md                       (Mis à jour v0.6.0)
-└── CHANGELOG.md                    (Mis à jour v0.6.0)
+├── platformio.ini                  (Updated v0.6.0)
+├── README.md                       (Updated v0.6.0)
+└── CHANGELOG.md                    (Updated v0.6.0)
 ```
 
 ---
 
-## ✅ Cohérence des modules web
+## ✅ Web Module Consistency
 
 ### web_styles.h
-- ✅ Contient le CSS complet (`WEB_STYLES`)
+- ✅ Contains complete CSS (`WEB_STYLES`)
 - ✅ Gradients, flexbox, animations
-- ✅ Utilisé par web_pages.h
-- ✅ Documentation Doxygen
+- ✅ Used by web_pages.h
+- ✅ Doxygen documentation
 
 ### web_pages.h
-- ✅ Inclut web_styles.h
-- ✅ Fonction `generateDashboardPage()` documentée
-- ✅ Paramètres bien définis
-- ✅ Retourne String HTML complète
+- ✅ Includes web_styles.h
+- ✅ Documented `generateDashboardPage()` function
+- ✅ Well-defined parameters
+- ✅ Returns complete HTML String
 
 ### web_interface.h
-- ✅ Inclut web_pages.h (qui inclut web_styles.h)
-- ✅ Handlers extern vers server
-- ✅ Fonction `setupWebServer()` centrale
-- ✅ Appelle `generateDashboardPage()` correctement
+- ✅ Includes web_pages.h (which includes web_styles.h)
+- ✅ Handlers extern to server
+- ✅ Central `setupWebServer()` function
+- ✅ Calls `generateDashboardPage()` correctly
 
 ---
 
-## ✅ Dépendances et inclusions
+## ✅ Dependencies and Inclusions
 
 ```
 main.cpp
@@ -297,25 +299,25 @@ main.cpp
 │        └─ const char* WEB_STYLES
 ```
 
-**Pas de dépendance circulaire** ✅
+**No circular dependency** ✅
 
 ---
 
 ## ✅ Compilation
 
-### Inclusions requises
+### Required Inclusions
 ```cpp
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
-#include "web_interface.h"  // Inclut tout le reste
+#include "web_interface.h"  // Includes everything else
 ```
 
-### Include guards
+### Include Guards
 
-**Pas de duplication de #include guards** ✅
+**No duplication of #include guards** ✅
 
-Chaque fichier a :
+Each file has:
 ```cpp
 #ifndef WEB_STYLES_H
 #define WEB_STYLES_H
@@ -325,56 +327,56 @@ Chaque fichier a :
 
 ---
 
-## ✅ Points de vérification utilisateur
+## ✅ User Verification Points
 
-### Avant compilation
-- [ ] Vérifier que `secrets.h` existe avec WiFi networks
-- [ ] Vérifier que platformio.ini pointe à la bonne carte
-- [ ] Vérifier HAS_OLED, HAS_NEOPIXEL dans config.h
+### Before Compilation
+- [ ] Verify that `secrets.h` exists with WiFi networks
+- [ ] Verify that platformio.ini points to correct board
+- [ ] Verify HAS_OLED, HAS_NEOPIXEL in config.h
 
-### Après compilation
-- [ ] Interface accessible sur http://[IP_ESP32]
-- [ ] Les 7 cartes affichées correctement
-- [ ] CSS et layout responsive
-- [ ] Boutons "Actualiser" et "Redémarrer" fonctionnels
+### After Compilation
+- [ ] Interface accessible at http://[ESP32_IP]
+- [ ] All 7 cards displayed correctly
+- [ ] CSS and responsive layout
+- [ ] "Refresh" and "Reboot" buttons functional
 
-### Vérifications de version
-- [ ] `PROJECT_VERSION` affiché en haut de page = 0.6.0
-- [ ] Serial monitor affiche "Version: 0.6.0"
-- [ ] CHANGELOG.md documente v0.6.0
+### Version Verification
+- [ ] `PROJECT_VERSION` displayed at top of page = 0.6.0
+- [ ] Serial monitor displays "Version: 0.6.0"
+- [ ] CHANGELOG.md documents v0.6.0
 
 ---
 
-## 📊 Résumé de cohérence
+## 📊 Consistency Summary
 
 | Aspect | Status | Notes |
 |--------|--------|-------|
-| **Versions** | ✅ Cohérentes | v0.6.0 partout |
-| **Documentation** | ✅ Complète | README, CHANGELOG, guides |
-| **Code** | ✅ Refactorisé | Modulaire et clean |
-| **Modules web** | ✅ Séparés | Styles, Pages, Interface |
-| **Dépendances** | ✅ Claires | Pas de circulaires |
-| **Compilation** | ✅ Prête | Structure valide |
-| **Organisation** | ✅ Propre | Racine + docs/ |
-| **Tests** | 🔄 À faire | Compilation + runtime |
+| **Versions** | ✅ Consistent | v0.6.0 everywhere |
+| **Documentation** | ✅ Complete | README, CHANGELOG, guides |
+| **Code** | ✅ Refactored | Modular and clean |
+| **Web modules** | ✅ Separated | Styles, Pages, Interface |
+| **Dependencies** | ✅ Clear | No circular |
+| **Compilation** | ✅ Ready | Valid structure |
+| **Organization** | ✅ Clean | Root + docs/ |
+| **Tests** | 🔄 To do | Compilation + runtime |
 
 ---
 
-## 📁 Structure de documentation
+## 📁 Documentation Structure
 
 ```
-Racine (essentiels utilisateur)
-├── README.md ........... Installation et démarrage
-└── CHANGELOG.md ....... Historique des versions
+Root (essential user files)
+├── README.md ........... Installation and startup
+└── CHANGELOG.md ....... Version history
 
-docs/ (référence technique)
-├── ARCHITECTURE.md .... Guide module web
-├── UPGRADE_0.6.0.md .. Résumé v0.6.0
-├── COHERENCE_CHECK.md  Vérifications
-└── SYNTHESIS.md ..... Synthèse complète
+docs/ (technical reference)
+├── ARCHITECTURE.md .... Web module guide
+├── UPGRADE_0.6.0.md .. v0.6.0 summary
+├── COHERENCE_CHECK.md  Verifications
+└── SYNTHESIS.md ..... Complete synthesis
 ```
 
 ---
 
-**Dernier contrôle** : 2025-12-04 v0.6.0  
-**Statut global** : ✅ **COHÉRENT ET ORGANISÉ**
+**Last check**: 2025-12-04 v0.6.0  
+**Overall status**: ✅ **CONSISTENT AND ORGANIZED**

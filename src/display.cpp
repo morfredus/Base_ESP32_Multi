@@ -1,8 +1,8 @@
 /**
  * @file display.cpp
  * @brief Implémentation du module de gestion des écrans
- * @version 0.7.0
- * @date 2025-12-06
+ * @version 0.8.2
+ * @date 2025-12-13
  */
 
 #include "display.h"
@@ -13,7 +13,8 @@
 #endif
 
 #ifdef HAS_ST7789
-    Adafruit_ST7789 display_tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
+    // Adafruit_ST7789 display_tft = Adafruit_ST7789(PIN_TFT_CS, PIN_TFT_DC, PIN_TFT_RST);
+    Adafruit_ST7789 display_tft = Adafruit_ST7789(&SPI, PIN_TFT_CS, PIN_TFT_DC, PIN_TFT_RST);
 #endif
 
 // =============================================================================
@@ -156,21 +157,24 @@ void updateOledConnected(const char* ssid, IPAddress ip) {
 
 #ifdef HAS_ST7789
 bool setupST7789() {
+    // Initialisation du SPI matériel
+    SPI.begin(PIN_TFT_SCLK, -1, PIN_TFT_MOSI, PIN_TFT_CS);
+    
     // Configuration du backlight
-    pinMode(TFT_BL, OUTPUT);
-    digitalWrite(TFT_BL, HIGH); // Allume le rétroéclairage
+    pinMode(PIN_TFT_BL, OUTPUT);
+    digitalWrite(PIN_TFT_BL, HIGH); // Allume le rétroéclairage
     
     // Initialisation du TFT
     display_tft.init(ST7789_WIDTH, ST7789_HEIGHT);
     display_tft.setRotation(ST7789_ROTATION);
-    display_tft.fillScreen(COLOR_BLACK);
+    display_tft.fillScreen(ST77XX_BLACK);
     
     return true; // ST7789 ne retourne pas d'erreur, on suppose qu'il est présent
 }
 
 void displayST7789Startup(const char* projectName, const char* projectVersion) {
-    display_tft.fillScreen(COLOR_BLACK);
-    display_tft.setTextColor(COLOR_CYAN);
+    display_tft.fillScreen(ST77XX_BLACK);
+    display_tft.setTextColor(ST77XX_CYAN);
     display_tft.setTextSize(3);
     
     // Calcul du centrage horizontal pour le nom du projet
@@ -184,7 +188,7 @@ void displayST7789Startup(const char* projectName, const char* projectVersion) {
     
     // Version
     display_tft.setTextSize(2);
-    display_tft.setTextColor(COLOR_WHITE);
+    display_tft.setTextColor(ST77XX_WHITE);
     String versionStr = "v" + String(projectVersion);
     display_tft.getTextBounds(versionStr.c_str(), 0, 0, &x1, &y1, &w, &h);
     centerX = (ST7789_WIDTH - w) / 2;
@@ -194,9 +198,9 @@ void displayST7789Startup(const char* projectName, const char* projectVersion) {
 
 void displayST7789Progress(int progress) {
     // Zone pour le texte de statut
-    display_tft.fillRect(0, 40, ST7789_WIDTH, 30, COLOR_BLACK);
+    display_tft.fillRect(0, 40, ST7789_WIDTH, 30, ST77XX_BLACK);
     display_tft.setTextSize(2);
-    display_tft.setTextColor(COLOR_YELLOW);
+    display_tft.setTextColor(ST77XX_YELLOW);
     
     int16_t x1, y1;
     uint16_t w, h;
@@ -212,20 +216,20 @@ void displayST7789Progress(int progress) {
     int barY = 160;
     
     // Efface la zone de la barre
-    display_tft.fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 20, COLOR_BLACK);
+    display_tft.fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 20, ST77XX_BLACK);
     
     // Contour de la barre
-    display_tft.drawRect(barX, barY, barWidth, barHeight, COLOR_WHITE);
+    display_tft.drawRect(barX, barY, barWidth, barHeight, ST77XX_WHITE);
     
     // Remplissage de la progression
     int fillWidth = (barWidth - 4) * progress / 100;
     if (fillWidth > 0) {
-        display_tft.fillRect(barX + 2, barY + 2, fillWidth, barHeight - 4, COLOR_GREEN);
+        display_tft.fillRect(barX + 2, barY + 2, fillWidth, barHeight - 4, ST77XX_GREEN);
     }
     
     // Pourcentage
     display_tft.setTextSize(2);
-    display_tft.setTextColor(COLOR_WHITE);
+    display_tft.setTextColor(ST77XX_WHITE);
     String percentStr = String(progress) + "%";
     display_tft.getTextBounds(percentStr.c_str(), 0, 0, &x1, &y1, &w, &h);
     centerX = (ST7789_WIDTH - w) / 2;
@@ -234,11 +238,11 @@ void displayST7789Progress(int progress) {
 }
 
 void displayST7789Connected(const char* ssid, IPAddress ip) {
-    display_tft.fillScreen(COLOR_BLACK);
+    display_tft.fillScreen(ST77XX_BLACK);
     
     // Titre
     display_tft.setTextSize(2);
-    display_tft.setTextColor(COLOR_CYAN);
+    display_tft.setTextColor(ST77XX_CYAN);
     int16_t x1, y1;
     uint16_t w, h;
     display_tft.getTextBounds(PROJECT_NAME, 0, 0, &x1, &y1, &w, &h);
@@ -248,7 +252,7 @@ void displayST7789Connected(const char* ssid, IPAddress ip) {
     
     // Version
     display_tft.setTextSize(1);
-    display_tft.setTextColor(COLOR_WHITE);
+    display_tft.setTextColor(ST77XX_WHITE);
     String versionStr = "v" + String(PROJECT_VERSION);
     display_tft.getTextBounds(versionStr.c_str(), 0, 0, &x1, &y1, &w, &h);
     centerX = (ST7789_WIDTH - w) / 2;
@@ -256,38 +260,38 @@ void displayST7789Connected(const char* ssid, IPAddress ip) {
     display_tft.println(versionStr);
     
     // Ligne de séparation
-    display_tft.drawLine(20, 60, ST7789_WIDTH - 20, 60, COLOR_CYAN);
+    display_tft.drawLine(20, 60, ST7789_WIDTH - 20, 60, ST77XX_CYAN);
     
     // WiFi connecté
     display_tft.setTextSize(2);
-    display_tft.setTextColor(COLOR_GREEN);
+    display_tft.setTextColor(ST77XX_GREEN);
     display_tft.setCursor(20, 80);
     display_tft.println("WiFi Connecte");
     
     // SSID
     display_tft.setTextSize(1);
-    display_tft.setTextColor(COLOR_YELLOW);
+    display_tft.setTextColor(ST77XX_YELLOW);
     display_tft.setCursor(20, 110);
     display_tft.println("Reseau:");
-    display_tft.setTextColor(COLOR_WHITE);
+    display_tft.setTextColor(ST77XX_WHITE);
     display_tft.setCursor(20, 125);
     display_tft.println(ssid);
     
     // Adresse IP
-    display_tft.setTextColor(COLOR_YELLOW);
+    display_tft.setTextColor(ST77XX_YELLOW);
     display_tft.setCursor(20, 150);
     display_tft.println("Adresse IP:");
-    display_tft.setTextColor(COLOR_WHITE);
+    display_tft.setTextColor(ST77XX_WHITE);
     display_tft.setTextSize(2);
     display_tft.setCursor(20, 170);
     display_tft.println(ip);
 }
 
 void displayST7789Failed() {
-    display_tft.fillScreen(COLOR_BLACK);
+    display_tft.fillScreen(ST77XX_BLACK);
     
     display_tft.setTextSize(3);
-    display_tft.setTextColor(COLOR_RED);
+    display_tft.setTextColor(ST77XX_RED);
     
     int16_t x1, y1;
     uint16_t w, h;
@@ -298,7 +302,7 @@ void displayST7789Failed() {
     display_tft.println("ERREUR");
     
     display_tft.setTextSize(2);
-    display_tft.setTextColor(COLOR_WHITE);
+    display_tft.setTextColor(ST77XX_WHITE);
     display_tft.getTextBounds("WiFi Echec", 0, 0, &x1, &y1, &w, &h);
     centerX = (ST7789_WIDTH - w) / 2;
     display_tft.setCursor(centerX, 120);

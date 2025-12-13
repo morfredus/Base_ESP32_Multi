@@ -1,4 +1,68 @@
-# 📋 Résumé des modifications - Version 0.7.0
+# 📋 Résumé des modifications
+
+**[English Version](IMPLEMENTATION_SUMMARY.md)**
+
+> **Note** : Ce document se trouve dans `docs/` avec toute la documentation technique. Seuls `README.md` et `CHANGELOG.md` restent à la racine du projet.
+
+## Version 0.8.2 (13 décembre 2025) - Optimisation TFT et Couleurs Adafruit
+
+### ✅ Améliorations Implémentées
+
+#### 1️⃣ **Utilisation du SPI matériel pour l'écran TFT**
+- ✓ Nouvelle déclaration : `Adafruit_ST7789(&SPI, ...)`
+- ✓ Ajout de `SPI.begin()` dans `setupST7789()`
+- ✓ Performance d'affichage améliorée
+
+#### 2️⃣ **Remplacement des couleurs personnalisées**
+- ✓ Suppression des définitions `COLOR_*` dans `config.h`
+- ✓ Utilisation des constantes officielles `ST77XX_*` d'Adafruit
+- ✓ 40+ occurrences remplacées dans `display.cpp` et `main.cpp`
+
+#### 3️⃣ **Fichiers modifiés**
+- ✓ `include/config.h` : Suppression des définitions de couleurs
+- ✓ `src/display.cpp` : SPI matériel + couleurs Adafruit
+- ✓ `src/main.cpp` : Couleurs Adafruit dans barre de progression
+
+#### 4️⃣ **Documentation créée**
+- ✓ **`CHANGES_v0.8.2.md`** : Documentation technique complète
+- ✓ `CHANGELOG.md` : Section [0.8.2] ajoutée
+
+#### 5️⃣ **Impact**
+- ✓ **Performance** : Affichage TFT plus rapide grâce au SPI matériel
+- ✓ **Maintenance** : -11 lignes de code redondant
+- ✓ **Standards** : Cohérence avec la bibliothèque Adafruit
+
+---
+
+## Version 0.8.1 (13 décembre 2025) - Cohérence des Noms de Pins
+
+### ✅ Corrections Implémentées
+
+#### 1️⃣ **Normalisation complète des noms de pins**
+- ✓ Tous les GPIO suivent maintenant la convention `PIN_<NOM_DESCRIPTIF>`
+- ✓ `board_config.h` établi comme **référence unique** du projet
+- ✓ 6 incohérences corrigées dans `display.cpp` et `main.cpp`
+
+#### 2️⃣ **Fichiers modifiés**
+- ✓ `src/display.cpp` : Pins TFT normalisés (TFT_CS → PIN_TFT_CS, etc.)
+- ✓ `src/main.cpp` : Pin Buzzer normalisé (DEFAULT_BUZZER_PIN → PIN_BUZZER)
+- ✓ `include/board_config.h` : Ajout de PIN_LED_BUILTIN pour ESP32 Classic
+
+#### 3️⃣ **Documentation mise à jour**
+- ✓ **`CHANGES_v0.8.1.md`** : Document détaillé des corrections
+- ✓ **`docs/UPGRADE_0.8.1.md`** : Guide de mise à jour
+- ✓ `CHANGELOG.md` : Section [0.8.1] ajoutée
+- ✓ `README.md` : Version actuelle mise à jour
+- ✓ `docs/COHERENCE_CHECK.md` : Convention de nommage documentée
+
+#### 4️⃣ **Impact**
+- ✓ **Maintenabilité** : Code plus cohérent et lisible
+- ✓ **Référence unique** : Plus de confusion sur les noms de pins
+- ✓ **Aucun impact fonctionnel** : Les GPIO restent identiques
+
+---
+
+## Version 0.7.0 (6 décembre 2025) - Support TFT ST7789
 
 ## ✅ Implémentation complète
 
