@@ -26,6 +26,15 @@
 #define OLED_ADDR        0x3C  // Adresse I2C standard (0x3D sur certains modèles)
 #define OLED_RESET       -1    // Pas de pin de reset (-1)
 
+// --- Configuration LED RGB ---
+// Décommenter pour activer le contrôle de la LED RGB standard
+#define HAS_LED_RGB
+
+// --- Configuration NeoPixel (LED RGB adressable) ---
+// Décommenter pour activer la neopixel intégrée
+#define HAS_NEOPIXEL
+#define NEOPIXEL_NUM     1     // Nombre de neopixels (1 pour le modèle intégré)
+
 // --- Configuration ST7789 (TFT couleur) ---
 // Décommenter pour activer l'affichage ST7789
 #define HAS_ST7789

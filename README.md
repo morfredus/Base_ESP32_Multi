@@ -13,7 +13,14 @@ Inclut la gestion automatique du WiFi, une structure multi-environnements et le 
   - Affichage du nom du projet et version au démarrage
   - Barre de progression de connexion WiFi
   - SSID et adresse IP une fois connecté
-* **Bouton Intelligent** : Appui long (1s) redémarre l'ESP32 avec confirmation visuelle.
+* **Système de boutons avancé** *(v0.8.0)* :
+  - **Bouton BOOT** : Reboot avec barre de progression 2 sec (annulable avant 100%)
+  - **Bouton 1** : Cycle RGB (Rouge → Vert → Bleu → Blanc → Éteint)
+  - **Bouton 2** : Bip Buzzer à l'appui (feedback sonore)
+* **NeoPixel intelligente** *(v0.8.0)* : 
+  - Violet fixe pendant redémarrage
+  - Vert heartbeat quand WiFi connecté
+  - Rouge heartbeat quand WiFi en recherche/déconnecté
 * **Structure Propre** : Séparation de la config projet (`config.h`), mapping hardware (`board_config.h`) et gestion d'affichage (`display.h`).
 
 ## 🛠️ Installation & Démarrage

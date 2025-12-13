@@ -1,47 +1,10 @@
-/**
- * @file board_config.h
- * @brief Mapping des pins GPIO pour les différentes cartes ESP32
- * @version 0.7.0
- * @date 2025-12-06
- * 
- * Ce fichier centralise toutes les définitions de pins selon la carte utilisée.
- * 
- * @section usage Utilisation
- * 1. Définissez la cible dans platformio.ini avec l'option `-D TARGET_ESP32_S3` ou `-D TARGET_ESP32_CLASSIC`
- * 2. Les pins correspondantes seront automatiquement sélectionnées
- * 3. Consultez docs/PIN_MAPPING.md pour les schémas de connexion détaillés
- * 
- * @section pinMapping Référence des pins
- * - Les broches I2C (SDA/SCL) sont pour l'écran OLED SSD1306
- * - Les broches SPI (MOSI/SCLK/CS/DC/RST) sont pour l'écran TFT ST7789 ou ILI9341
- * - NEOPIXEL est optionnel (LED RGB adressable)
- * 
- * @see include/config.h pour activer/désactiver les écrans (HAS_OLED, HAS_ST7789)
- */
-
 #ifndef BOARD_CONFIG_H
 #define BOARD_CONFIG_H
 
-#include <Arduino.h>
-
-// ============================================================================
-// BOUTON BOOT - Disponible sur toutes les cartes
-// ============================================================================
-/**
- * @def PIN_BUTTON_BOOT
- * @brief Bouton BOOT intégré sur toutes les cartes ESP32
- * 
- * Ce bouton est présent physiquement sur la carte. Appui long pour redémarrer.
- * Valeur GPIO : 0 (universel sur toutes les ESP32)
- * 
- * @note Actif bas : L'appui ramène le pin à GND (0V)
- * @see main.cpp pour la gestion (OneButton library)
- */
-#define PIN_BUTTON_BOOT 0 
-
-// ============================================================================
-// CONFIGURATION ESP32-S3 DevKitC-1
-// ============================================================================
+// =========================================================
+//         Configuration Pinout ESP32-S3 DevKitC-1 N16R8
+// =========================================================
+// Cette section définit les broches (Pins) de l'ESP32-S3 (une version plus récente et puissante).
 #if defined(TARGET_ESP32_S3)
 
     /**
@@ -49,62 +12,115 @@
      * @brief Nom lisible de la carte pour affichage
      */
     #define BOARD_NAME "ESP32-S3 DevKitC-1"
-    
-    // ========================================================================
-    // LED RGB (NeoPixel) - Optionnel
-    // ========================================================================
-    /**
-     * @defgroup NEOPIXEL NeoPixel LED RGB
-     * @brief Configuration de la LED RGB adressable intégrée
-     * @{
-     */
-    #define HAS_NEOPIXEL           ///< Définit que la carte a un NeoPixel
-    #define PIN_NEOPIXEL 48        ///< GPIO 48 : Broche de contrôle de la LED
-    #define NEOPIXEL_NUM 1         ///< Nombre de pixels (1 sur la S3 DevKitC)
-    /** @} */
-    
-    // ========================================================================
-    // Bus I2C - Pour l'écran OLED SSD1306
-    // ========================================================================
-    /**
-     * @defgroup I2C_OLED Bus I2C pour OLED
-     * @brief Configuration des pins I2C pour l'écran OLED SSD1306
-     * 
-     * Protocole I2C : Utilise seulement 2 broches de données (SDA/SCL)
-     * - Plus simple à câbler (moins de fils)
-     * - Partageable avec plusieurs appareils I2C
-     * - Adresse par défaut : 0x3C (voir config.h)
-     * @{
-     */
-    #define PIN_I2C_SDA 21         ///< GPIO 21 : Données I2C (Serial DAta)
-    #define PIN_I2C_SCL 20         ///< GPIO 20 : Horloge I2C (Serial CLock)
-    /** @} */
 
-    // ========================================================================
-    // Bus SPI - Pour l'écran TFT ST7789 (écran couleur)
-    // ========================================================================
-    /**
-     * @defgroup SPI_TFT Bus SPI pour TFT ST7789
-     * @brief Configuration des pins SPI pour l'écran TFT ST7789 (240x240 couleur)
-     * 
-     * Protocole SPI : Communication rapide avec plusieurs broches de contrôle
-     * - Très rapide (écran couleur fluide)
-     * - Plus de branchements que I2C
-     * 
-     * @note Consultez docs/PIN_MAPPING.md pour le schéma de connexion complet
-     * @{
-     */
-    #define TFT_MOSI  11      ///< GPIO 11 : Données (Master Out Slave In) / SDA du TFT
-    #define TFT_SCLK  12      ///< GPIO 12 : Horloge SPI (Serial CLocK) / SCL du TFT
-    #define TFT_CS    10      ///< GPIO 10 : Sélection puce (Chip Select)
-    #define TFT_DC     9      ///< GPIO  9 : Données/Commande (Data/Command)
-    #define TFT_RST   13      ///< GPIO 13 : Réinitialisation (ReSeT)
-    #define TFT_BL     7      ///< GPIO  7 : Rétroéclairage (BackLight) - LED pour illuminer l'écran
-    /** @} */
+// ============================================================
+// RAPPELS DE SÉCURITÉ ESP32-S3 (Basé sur le tableau de câblage)
+// ============================================================
+// !!! TRÈS IMPORTANT : Lisez ceci avant de connecter quoi que ce soit !!!
+//
+// - Tension logique: 3.3 V uniquement sur GPIO. 
+//   -> L'ESP32-S3 fonctionne en 3.3 Volts. **Ne jamais appliquer 5V directement** sur les broches GPIO,
+//      sauf si un circuit de protection/conversion (comme un diviseur de tension) est utilisé.
+// - GPIO0 : broche BOOT (strapping) – réservée au boot, ne pas connecter d'élément maintenu à LOW.
+//   -> Cette broche est utilisée par l'ESP32 pour démarrer. Ne l'utilisez pas pour autre chose.
+// - GPIO46 : utilisé pour le capteur PIR. À vérifier pour l'impact potentiel sur le JTAG (moins critique que GPIO0).
+//   -> C'est une broche spéciale qui peut être liée au débogage (JTAG). Attention lors de l'utilisation.
+//
+// - GPS TX (vers RXD 18) et HC-SR04 ECHO (vers GPIO 35) : nécessitent un DIVISEUR DE TENSION si le signal est 5V.
+//   -> Si ces capteurs sont alimentés en 5V, leurs signaux de sortie doivent être abaissés à 3.3V pour l'ESP32. 
+// - LEDs : ajouter résistance série 220–470 O (0.25 W).
+//   -> **Obligatoire** pour limiter le courant et éviter de griller la LED et/ou la broche de l'ESP32.
+// - I2C (GPIO 15/16) : pull-up 4.7 kO vers 3.3 V OBLIGATOIRE.
+//   -> Pour le protocole I2C, des résistances de "pull-up" (tirage vers le haut) sont nécessaires 
+//      sur les lignes SDA et SCL pour que la communication fonctionne correctement.
+// - Buzzer : transistor nécessaire (avec résistance de base 1–10 kO) si passif ou courant >12 mA.
+//   -> Un buzzer (surtout s'il est passif ou consomme beaucoup) demande plus de courant que l'ESP32 ne peut fournir directement. 
+//      Un transistor agit comme un interrupteur puissant commandé par l'ESP32.
+// ============================================================
 
-// ============================================================================
-// CONFIGURATION ESP32 CLASSIQUE (DevKitC)
-// ============================================================================
+// ------------------------------------
+// DÉTAIL TECHNIQUE : Le Diviseur de Tension
+// ------------------------------------
+// OBJECTIF : Protéger les entrées de l'ESP32 (3.3V max) lorsqu'elles reçoivent un signal d'un composant 5V.
+// FONCTIONNEMENT : Le diviseur utilise deux résistances (R1 et R2) pour "diviser" la tension d'entrée (V_in).
+// Le signal de sortie (V_out) que reçoit l'ESP32 est calculé par la formule :
+// $$V_{out} = V_{in} \cdot \frac{R_2}{R_1 + R_2}$$
+// Pour abaisser 5V à 3.3V (ou moins) pour l'ESP32, on choisit généralement R1=10 kOhm et R2=20 kOhm, 
+// ou plus simplement R1=2kOhm et R2=3kOhm.
+// S'applique ici aux broches d'entrée (RXD) du GPS et au signal ECHO du HC-SR04 si ils sont en 5V.
+// 
+// ------------------------------------
+
+
+// ------------------------------------
+// GPS (UART1)
+// ------------------------------------
+// Configuration de la communication série (UART1) avec le module GPS.
+#define PIN_GPS_RXD           18  // GPS TX (vers RXD de l'ESP32). **Si 5V, Diviseur de tension OBLIGATOIRE.**
+#define PIN_GPS_TXD           17  // GPS RX (vers TXD de l'ESP32). Câblage direct.
+#define PIN_GPS_PPS           8   // GPS PPS, Câblage direct.
+
+// ------------------------------------
+// TFT ST7789 (SPI)
+// ------------------------------------
+// Configuration de l'écran couleur (TFT) utilisant le protocole SPI.
+#define TFT_MOSI              11  // SPI MOSI (Master Out Slave In) : Broche de données vers l'écran. Câblage direct.
+#define TFT_SCLK              12  // SPI Clock (Horloge) : Broche de synchronisation. Câblage direct.
+#define TFT_CS                10  // Chip Select : Broche pour activer spécifiquement cet écran. Câblage direct.
+#define TFT_DC                9   // Data/Command : Broche pour indiquer si les données sont des pixels ou une commande. Câblage direct.
+#define TFT_RST               13  // Reset écran. Pull-up/down selon librairie.
+#define TFT_BL                7   // Backlight (Rétroéclairage) : Souvent utilisé avec le PWM pour ajuster la luminosité.
+
+// ------------------------------------
+// I2C
+// ------------------------------------
+// Configuration du bus de communication I2C.
+#define PIN_I2C_SDA       15  // SDA (Serial Data Line). **Pull-Up 4.7kO vers 3.3V OBLIGATOIRE.**
+#define PIN_I2C_SCL       16  // SCL (Serial Clock Line). **Pull-Up 4.7kO vers 3.3V OBLIGATOIRE.**
+
+// ------------------------------------
+// DÉTAIL TECHNIQUE : Le Bus I2C (Inter-Integrated Circuit)
+// ------------------------------------
+// OBJECTIF : Permettre à plusieurs capteurs/périphériques de communiquer avec l'ESP32 en utilisant seulement deux broches (SDA et SCL).
+// L'IMPÉRATIF PULL-UP : Le bus I2C utilise des sorties à drain ouvert (open-drain). Des résistances externes (Pull-Up, typiquement 4.7 kOhm vers 3.3V) sont nécessaires pour tirer le signal vers le haut.
+// 
+// ------------------------------------
+
+
+// ------------------------------------
+// LED RGB
+// ------------------------------------
+#define PIN_LED_RED 21 // Rouge. Résistance série **220O - 470O**.
+#define PIN_LED_GREEN 41 // Vert. Résistance série **220O - 470O**.
+#define PIN_LED_BLUE 42 // Bleu. Résistance série **220O - 470O**.
+#define NEOPIXEL_PIN          48 // NeoPixel Intégrée. Data (Réservée).
+
+// ------------------------------------
+// Boutons
+// ------------------------------------
+#define PIN_BUTTON_BOOT       0   // Bouton BOOT (strap). Réservé au boot.
+#define PIN_BUTTON_1          38  // Bouton vers GND. Utiliser **Pull-Up interne**.
+#define PIN_BUTTON_2          39  // Bouton vers GND. Utiliser **Pull-Up interne**.
+
+// ------------------------------------
+// Capteurs & Sorties
+// ------------------------------------
+#define DEFAULT_PWM_PIN       20  // PWM générique. Résistance série **220O - 470O** si LED.
+#define DEFAULT_BUZZER_PIN    6   // Buzzer. Transistor + **Résistance base 1–10kO**.
+#define DEFAULT_DHT_PIN       5   // DHT. **Pull-Up 10kO vers 3.3V**.
+#define DEFAULT_MOTION_SENSOR_PIN 46 // PIR. Câblage direct. **(Potentiel JTAG - attention au boot).**
+#define DEFAULT_LIGHT_SENSOR_PIN 4  // LDR. **Diviseur ~10kO**.
+
+// ------------------------------------
+// Capteurs de Distance
+// ------------------------------------
+#define DEFAULT_DISTANCE_TRIG_PIN 2  // HC-SR04 TRIG. Câblage direct.
+#define DEFAULT_DISTANCE_ECHO_PIN 35 // HC-SR04 ECHO. **Si 5V, ajouter Diviseur de tension OBLIGATOIRE.**
+
+
+// =========================================================
+//         MAPPING ESP32 CLASSIQUE (DevKitC)
+// =========================================================
 #elif defined(TARGET_ESP32_CLASSIC)
 
     /**
@@ -112,81 +128,95 @@
      * @brief Nom lisible de la carte pour affichage
      */
     #define BOARD_NAME "ESP32 Classic DevKitC"
-    
-    // ========================================================================
-    // LED Builtin - Optionnel (écran de diagnostic)
-    // ========================================================================
-    /**
-     * @defgroup LED_BUILTIN LED Builtin
-     * @brief Configuration de la LED bleue intégrée
-     * @{
-     */
-    #define PIN_LED_BUILTIN 2    ///< GPIO 2 : LED bleue intégrée (heartbeat visuel)
-    /** @} */
-    
-    // ========================================================================
-    // Bus I2C - Pour l'écran OLED SSD1306
-    // ========================================================================
-    /**
-     * @defgroup I2C_OLED Bus I2C pour OLED
-     * @brief Configuration des pins I2C pour l'écran OLED SSD1306
-     * 
-     * Pins I2C différentes sur ESP32 Classic par rapport à S3
-     * @{
-     */
-    #define PIN_I2C_SDA 21       ///< GPIO 21 : Données I2C
-    #define PIN_I2C_SCL 22       ///< GPIO 22 : Horloge I2C
-    /** @} */
 
-    // ========================================================================
-    // Bus SPI - Pour l'écran TFT ILI9341 (écran couleur)
-    // ========================================================================
-    /**
-     * @defgroup SPI_TFT Bus SPI pour TFT ILI9341
-     * @brief Configuration des pins SPI pour écran TFT ILI9341
-     * 
-     * Pins SPI différentes sur ESP32 Classic par rapport à S3.
-     * Note : On utilise ILI9341 sur Classic, ST7789 sur S3
-     * @{
-     */
-    #define TFT_MOSI  23      ///< GPIO 23 : Données SPI / SDA du TFT
-    #define TFT_SCLK  18      ///< GPIO 18 : Horloge SPI / SCL du TFT
-    #define TFT_CS    19      ///< GPIO 19 : Sélection puce
-    #define TFT_DC    27      ///< GPIO 27 : Données/Commande
-    #define TFT_RST   26      ///< GPIO 26 : Réinitialisation
-    #define TFT_BL    13      ///< GPIO 13 : Rétroéclairage
-    /** @} */
+// ============================================================
+// RAPPELS DE SÉCURITÉ ESP32-WROOM (Basé sur le tableau de câblage)
+// ============================================================
+// - Tension logique: 3.3 V uniquement sur GPIO.
+// - Éviter GPIO0 (strap), GPIO1, 3 (UART0 - console série).
+//   -> GPIO0 est pour le boot, GPIO 1 et 3 sont réservées à la console série (debugging).
+// - GPIO34, 35, 36, 39: entrées seulement (pas de sortie, pas de pull interne).
+//   -> Ces broches sont des entrées pures et ne peuvent pas être configurées comme sorties (ni pour Pull-Up/Down interne).
+// - GPS TX (vers RXD 16) et HC-SR04 ECHO (vers GPIO 35) : nécessitent un DIVISEUR DE TENSION si le signal est 5V.
+// - LEDs : ajouter résistance série 220–470 O (0.25 W).
+// - I2C (GPIO 21/22) : pull-up 4.7 kO vers 3.3 V OBLIGATOIRE.
+// - Buzzer : transistor nécessaire (avec résistance de base 1–10 kO) si passif ou courant >12 mA.
+// ============================================================
+
+// ------------------------------------
+// DÉTAIL TECHNIQUE : Le Diviseur de Tension
+// ------------------------------------
+// OBJECTIF : Protéger les entrées de l'ESP32 (3.3V max) lorsqu'elles reçoivent un signal d'un composant 5V.
+// FONCTIONNEMENT : Le diviseur utilise deux résistances (R1 et R2) pour "diviser" la tension d'entrée (V_in).
+// Le signal de sortie (V_out) que reçoit l'ESP32 est calculé par la formule :
+// $$V_{out} = V_{in} \cdot \frac{R_2}{R_1 + R_2}$$
+// Pour abaisser 5V à 3.3V (ou moins) pour l'ESP32, on choisit généralement R1=10 kOhm et R2=20 kOhm, 
+// ou plus simplement R1=2kOhm et R2=3kOhm.
+// S'applique ici aux broches d'entrée (RXD) du GPS et au signal ECHO du HC-SR04 si ils sont en 5V.
+// 
+// ------------------------------------
+
+// ------------------------------------
+// GPS (UART2)
+// ------------------------------------
+#define PIN_GPS_RXD           16  // GPS TX (vers RXD de l'ESP32). **Si 5V, Diviseur de tension OBLIGATOIRE.**
+#define PIN_GPS_TXD           17  // GPS RX (vers TXD de l'ESP32). Câblage direct.
+#define PIN_GPS_PPS           36  // GPS PPS. Entrée seule, câblage direct.
+
+// ------------------------------------
+// TFT ST7789 (SPI)
+// ------------------------------------
+#define TFT_SCLK              18  // SPI Clock. Câblage direct.
+#define TFT_MOSI              23  // SPI MOSI. Câblage direct.
+#define TFT_CS                27  // Chip Select. Câblage direct.
+#define TFT_DC                14  // Data/Command. Câblage direct.
+#define TFT_RST               25  // Reset écran. Pull-up/down selon librairie.
+#define TFT_BL                32  // Backlight (PWM). Câblage direct (PWM).
+
+// ------------------------------------
+// I2C
+// ------------------------------------
+#define PIN_I2C_SDA       21  // SDA. **Pull-Up 4.7kO vers 3.3V OBLIGATOIRE.**
+#define PIN_I2C_SCL       22  // SCL. **Pull-Up 4.7kO vers 3.3V OBLIGATOIRE.**
+
+// ------------------------------------
+// DÉTAIL TECHNIQUE : Le Bus I2C (Inter-Integrated Circuit)
+// ------------------------------------
+// OBJECTIF : Permettre à plusieurs capteurs/périphériques de communiquer avec l'ESP32 en utilisant seulement deux broches (SDA et SCL).
+// L'IMPÉRATIF PULL-UP : Le bus I2C utilise des sorties à drain ouvert (open-drain). Des résistances externes (Pull-Up, typiquement 4.7 kOhm vers 3.3V) sont nécessaires pour tirer le signal vers le haut.
+// 
+// ------------------------------------
+
+// ------------------------------------
+// LED RGB
+// ------------------------------------
+#define PIN_LED_RED 13  // Rouge. Résistance série **220O - 470O**.
+#define PIN_LED_GREEN 26  // Vert. Résistance série **220O - 470O**.
+#define PIN_LED_BLUE 33  // Bleu. Résistance série **220O - 470O**.
+
+// ------------------------------------
+// Boutons
+// ------------------------------------
+#define PIN_BUTTON_BOOT       0   // Bouton BOOT (strap). Réservé au boot, ne pas utiliser comme bouton utilisateur.
+#define PIN_BUTTON_1          2   // Bouton vers GND. Utiliser **Pull-Up interne**.
+#define PIN_BUTTON_2          5   // Bouton vers GND. Utiliser **Pull-Up interne**.
+
+// ------------------------------------
+// Capteurs & Sorties
+// ------------------------------------
+#define DEFAULT_PWM_PIN       4   // PWM générique. Résistance série **220O - 470O** si LED.
+#define DEFAULT_BUZZER_PIN    19  // Buzzer. Transistor + **Résistance base 1–10kO**.
+#define DEFAULT_DHT_PIN       15  // DHT. **Pull-Up 10kO vers 3.3V**.
+#define DEFAULT_LIGHT_SENSOR_PIN 39 // LDR. Entrée seule. **Diviseur ~10kO**.
+
+// ------------------------------------
+// Capteurs de Distance
+// ------------------------------------
+#define DEFAULT_DISTANCE_TRIG_PIN 12 // HC-SR04 TRIG. Sortie. (Déplacé de 32).
+#define DEFAULT_DISTANCE_ECHO_PIN 35 // HC-SR04 ECHO. Entrée seule. **Si 5V, Diviseur de tension OBLIGATOIRE.**
 
 #else
-    #error "Aucune cible definie ! Utilisez -D TARGET_ESP32_S3 ou -D TARGET_ESP32_CLASSIC dans platformio.ini"
+    #error "Aucune cible definie ! Verifiez platformio.ini (TARGET_ESP32_...)"
 #endif
-
-// ============================================================================
-// NOTES DE CONNEXION POUR DÉBUTANTS
-// ============================================================================
-/**
- * @page beginnerGuide Guide de connexion pour débutants
- * 
- * @section connector Connaissance de base
- * - **GPIO** : General Purpose Input/Output - pins que vous pouvez programmer
- * - **I2C** : Inter-Integrated Circuit - protocole pour communiquer lentement avec des composants
- * - **SPI** : Serial Peripheral Interface - protocole plus rapide que I2C
- * - **GND** : Ground (masse) - référence électrique, TOUJOURS à connecter
- * - **3V3** : Alimentation 3.3V - tension pour alimenter les modules (⚠️ pas 5V sur ESP32!)
- * 
- * @section connectionSteps Étapes de connexion physique
- * 1. **Coupez l'alimentation** : Débranchez le câble USB avant de brancher/débrancher des composants
- * 2. **Identifiez les broches** : Comptez depuis le bord ou repérez les numéros sérigraphiés
- * 3. **Connectez en respectant l'ordre** : D'abord GND, puis les données, puis VCC
- * 4. **Vérifiez deux fois** : Triple-check avant de brancher l'alimentation !
- * 5. **Mettez sous tension** : Branchez le câble USB
- * 
- * @section troubleshooting Dépannage
- * - Écran reste noir ? Vérifiez le rétroéclairage (pin BL) et l'adresse I2C
- * - OLED ne s'allume pas ? Testez les adresses 0x3C et 0x3D
- * - TFT affiche n'importe quoi ? Revérifiez tous les câblages SPI
- * 
- * @see docs/PIN_MAPPING.md pour les schémas détaillés et images de câblage
- */
 
 #endif // BOARD_CONFIG_H

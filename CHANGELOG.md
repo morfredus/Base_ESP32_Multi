@@ -5,6 +5,41 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [0.8.0] - 2025-12-13
+
+### Ajouté
+- 🎮 **Système de contrôle multi-boutons avancé** :
+  - Bouton BOOT : Redémarrage avec barre de progression 2 sec (annulable avant 100%)
+  - Bouton 1 : Cycle RGB (Rouge → Vert → Bleu → Blanc → Éteint)
+  - Bouton 2 : Bip Buzzer à l'appui (1kHz, 100ms)
+- 🎨 **Gestion améliorée de la NeoPixel** :
+  - Violet fixe pendant séquence reboot
+  - Vert heartbeat quand WiFi connecté
+  - Rouge heartbeat quand WiFi déconnecté/recherche
+- 🔊 **Retour sonore** : Buzzer piézo pour feedback utilisateur (Pin 6)
+- 🚨 **Sécurité de redémarrage** : Annulation possible avant 100% avec restauration écran
+- 📊 **Barre de progression TFT** : Affichage en magenta, mise à jour chaque 50ms
+
+### Modifié
+- 🔄 **main.cpp** : Refonte complète de la gestion des boutons
+  - Ajout de 3 objets OneButton (BOOT, BTN1, BTN2)
+  - Nouvelles fonctions callback : `handleButton1Click()`, `handleButton2PressStart()`, `handleButton2PressStop()`
+  - Modification `handleLongPress()` avec logique de reboot à 100%
+  - Amélioration du heartbeat NeoPixel avec condition `isRebooting`
+- ⚙️ **config.h** : Activation des définitions HAS_LED_RGB et HAS_NEOPIXEL
+- 🎯 **Logique reboot** : Vérification directe du pin via `digitalRead()` pour fiabilité
+
+### Corrigé
+- 🐛 LED RGB maintenant controlée correctement (definition HAS_LED_RGB)
+- 🐛 NeoPixel affichant tous les états WiFi + reboot
+- 🐛 Reboot ne se déclenche que si barre à 100% + bouton toujours appuyé
+- 🐛 Restauration automatique de l'écran WiFi après annulation reboot
+
+### Documentation
+- 📋 Ajout de `CHANGES_v0.8.0.md` : Document détaillé des 10 changements numérotés
+- 📊 Tableaux récapitulatifs des pins et comportements
+- 🧪 Section tests effectués avec résultats
+
 ## [0.7.0] - 2025-12-06
 
 ### Ajouté
