@@ -99,6 +99,13 @@
 #define LED_BLUE   42 // LED Bleue – sortie 3.3V, résistance série 220–470 O
 #define NEOPIXEL   48 // Data NeoPixel – sortie 3.3V (LED souvent alimentée en 5V)
 
+// NeoPixel Matrix 8x8 (WS2812B-64)
+// Compatible avec matrices LED adressables type WS2812B, WS2811, SK6812
+// Nécessite : Adafruit_NeoPixel ou FastLED
+// Câblage : GPIO → DIN (Data In) de la matrice, GND commun, VCC matrice → 5V externe
+// Note : Pour 64 LEDs à pleine luminosité (blanc 100%), prévoir alimentation 5V/3A minimum
+#define NEOPIXEL_MATRIX 3  // Data Matrix NeoPixel 8x8 – sortie 3.3V (signal), matrice alimentée en 5V
+
 
 // ------------------------------------
 // Boutons
@@ -213,6 +220,15 @@
 #define LED_GREEN   26 // LED Verte – sortie 3.3V, résistance 220–470 O
 #define LED_BLUE    33 // LED Bleue – sortie 3.3V, résistance 220–470 O
 #define LED_BUILTIN  2 // LED intégrée – sortie 3.3V
+
+// NeoPixel Matrix 8x8 (WS2812B-64)
+// Compatible avec matrices LED adressables type WS2812B, WS2811, SK6812
+// Nécessite : Adafruit_NeoPixel ou FastLED
+// Câblage : GPIO → DIN (Data In) de la matrice, GND commun, VCC matrice → 5V externe
+// Note : Pour 64 LEDs à pleine luminosité (blanc 100%), prévoir alimentation 5V/3A minimum
+// ⚠️ ATTENTION : GPIO 2 est partagé avec LED_BUILTIN. Ne pas utiliser les deux simultanément.
+//               Si vous utilisez la matrice NeoPixel, désactivez LED_BUILTIN dans le code.
+#define NEOPIXEL_MATRIX 2  // Data Matrix NeoPixel 8x8 – sortie 3.3V (signal), matrice alimentée en 5V
 
 
 // ------------------------------------
