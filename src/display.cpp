@@ -13,8 +13,8 @@
 #endif
 
 #ifdef HAS_ST7789
-    // Adafruit_ST7789 display_tft = Adafruit_ST7789(PIN_TFT_CS, PIN_TFT_DC, PIN_TFT_RST);
-    Adafruit_ST7789 display_tft = Adafruit_ST7789(&SPI, PIN_TFT_CS, PIN_TFT_DC, PIN_TFT_RST);
+    // Adafruit_ST7789 display_tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
+    Adafruit_ST7789 display_tft = Adafruit_ST7789(&SPI, TFT_CS, TFT_DC, TFT_RST);
 #endif
 
 // =============================================================================
@@ -93,7 +93,7 @@ void displayWifiFailed() {
 
 #ifdef HAS_OLED
 bool setupOled() {
-    Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
+    Wire.begin(I2C_SDA, I2C_SCL);
     
     if (!display_oled.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR)) {
         return false;
@@ -158,11 +158,11 @@ void updateOledConnected(const char* ssid, IPAddress ip) {
 #ifdef HAS_ST7789
 bool setupST7789() {
     // Initialisation du SPI matériel
-    SPI.begin(PIN_TFT_SCLK, -1, PIN_TFT_MOSI, PIN_TFT_CS);
+    SPI.begin(TFT_SCLK, -1, TFT_MOSI, TFT_CS);
     
     // Configuration du backlight
-    pinMode(PIN_TFT_BL, OUTPUT);
-    digitalWrite(PIN_TFT_BL, HIGH); // Allume le rétroéclairage
+    pinMode(TFT_BL, OUTPUT);
+    digitalWrite(TFT_BL, HIGH); // Allume le rétroéclairage
     
     // Initialisation du TFT
     display_tft.init(ST7789_WIDTH, ST7789_HEIGHT);

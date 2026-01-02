@@ -14,12 +14,12 @@
 // --- OBJETS ---
 WiFiMulti wifiMulti;
 WebServer server(80);
-OneButton btn(PIN_BUTTON_BOOT, true); // true = Active Low (Bouton poussoir standard vers GND)
-OneButton btn1(PIN_BUTTON_1, true);   // Bouton 1 - Cycle RGB
-OneButton btn2(PIN_BUTTON_2, true);   // Bouton 2 - Buzzer
+OneButton btn(BUTTON_BOOT, true); // true = Active Low (Bouton poussoir standard vers GND)
+OneButton btn1(BUTTON_1, true);   // Bouton 1 - Cycle RGB
+OneButton btn2(BUTTON_2, true);   // Bouton 2 - Buzzer
 
 #ifdef HAS_NEOPIXEL
-    Adafruit_NeoPixel pixels(NEOPIXEL_NUM, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
+    Adafruit_NeoPixel pixels(NEOPIXEL_NUM, NEOPIXEL, NEO_GRB + NEO_KHZ800);
 #endif
 
 // --- VARIABLES GLOBALES ---
@@ -90,7 +90,7 @@ void handleLongPress() {
             
             while (millis() - startTime < progressDuration) {
                 // Vérifier si le bouton BOOT est toujours appuyé (Active Low = LOW = appuyé)
-                bool buttonStillPressed = (digitalRead(PIN_BUTTON_BOOT) == LOW);
+                bool buttonStillPressed = (digitalRead(BUTTON_BOOT) == LOW);
                 
                 if (!buttonStillPressed) {
                     // Bouton relâché avant la fin
@@ -134,7 +134,7 @@ void handleLongPress() {
             }
             
             // Si on est sortie de la boucle normalement, la barre est à 100%
-            if (isRebooting && digitalRead(PIN_BUTTON_BOOT) == LOW) {
+            if (isRebooting && digitalRead(BUTTON_BOOT) == LOW) {
                 LOG_PRINTLN(">> Barre complétée à 100% ! Redémarrage...");
                 completedFully = true;
             }
@@ -142,7 +142,7 @@ void handleLongPress() {
     #endif
     
     // Seulement redémarrer si la barre a atteint 100%
-    if (isRebooting && digitalRead(PIN_BUTTON_BOOT) == LOW) {
+    if (isRebooting && digitalRead(BUTTON_BOOT) == LOW) {
         delay(500); // Pause pour afficher le message
         ESP.restart();
     }
@@ -161,33 +161,33 @@ void handleButton1Click() {
     #ifdef HAS_LED_RGB
         switch (rgbState) {
             case 0: // Rouge
-                digitalWrite(PIN_LED_RED, HIGH);
-                digitalWrite(PIN_LED_GREEN, LOW);
-                digitalWrite(PIN_LED_BLUE, LOW);
+                digitalWrite(LED_RED, HIGH);
+                digitalWrite(LED_GREEN, LOW);
+                digitalWrite(LED_BLUE, LOW);
                 LOG_PRINTLN("   -> ROUGE");
                 break;
             case 1: // Vert
-                digitalWrite(PIN_LED_RED, LOW);
-                digitalWrite(PIN_LED_GREEN, HIGH);
-                digitalWrite(PIN_LED_BLUE, LOW);
+                digitalWrite(LED_RED, LOW);
+                digitalWrite(LED_GREEN, HIGH);
+                digitalWrite(LED_BLUE, LOW);
                 LOG_PRINTLN("   -> VERT");
                 break;
             case 2: // Bleu
-                digitalWrite(PIN_LED_RED, LOW);
-                digitalWrite(PIN_LED_GREEN, LOW);
-                digitalWrite(PIN_LED_BLUE, HIGH);
+                digitalWrite(LED_RED, LOW);
+                digitalWrite(LED_GREEN, LOW);
+                digitalWrite(LED_BLUE, HIGH);
                 LOG_PRINTLN("   -> BLEU");
                 break;
             case 3: // Blanc
-                digitalWrite(PIN_LED_RED, HIGH);
-                digitalWrite(PIN_LED_GREEN, HIGH);
-                digitalWrite(PIN_LED_BLUE, HIGH);
+                digitalWrite(LED_RED, HIGH);
+                digitalWrite(LED_GREEN, HIGH);
+                digitalWrite(LED_BLUE, HIGH);
                 LOG_PRINTLN("   -> BLANC");
                 break;
             case 4: // Éteint
-                digitalWrite(PIN_LED_RED, LOW);
-                digitalWrite(PIN_LED_GREEN, LOW);
-                digitalWrite(PIN_LED_BLUE, LOW);
+                digitalWrite(LED_RED, LOW);
+                digitalWrite(LED_GREEN, LOW);
+                digitalWrite(LED_BLUE, LOW);
                 LOG_PRINTLN("   -> ETEINT");
                 break;
         }
@@ -202,13 +202,13 @@ void handleButton2PressStart() {
     LOG_PRINTLN(">> Bouton 2 appuyé ! Bip buzzer...");
     
     // Émettre un bip : pulse le buzzer à 1000 Hz pendant 100ms
-    tone(PIN_BUZZER, 1000, 100);
+    tone(BUZZER, 1000, 100);
 }
 
 // Arrêt appui Bouton 2
 void handleButton2PressStop() {
     // Arrêter le bip si encore actif
-    noTone(PIN_BUZZER);
+    noTone(BUZZER);
 }
 
 // --- FONCTIONS WIFI ---
@@ -278,13 +278,13 @@ void setup() {
 
     // Init LED RGB intégrée
     #ifdef HAS_LED_RGB
-        pinMode(PIN_LED_RED, OUTPUT);
-        pinMode(PIN_LED_GREEN, OUTPUT);
-        pinMode(PIN_LED_BLUE, OUTPUT);
+        pinMode(LED_RED, OUTPUT);
+        pinMode(LED_GREEN, OUTPUT);
+        pinMode(LED_BLUE, OUTPUT);
         // Éteindre la LED RGB au démarrage (LOW = éteint)
-        digitalWrite(PIN_LED_RED, LOW);
-        digitalWrite(PIN_LED_GREEN, LOW);
-        digitalWrite(PIN_LED_BLUE, LOW);
+        digitalWrite(LED_RED, LOW);
+        digitalWrite(LED_GREEN, LOW);
+        digitalWrite(LED_BLUE, LOW);
     #endif
 
     // Init NeoPixel
@@ -296,13 +296,13 @@ void setup() {
     #endif
 
     // Init LED Builtin (si existante)
-    #ifdef PIN_LED_BUILTIN
-        pinMode(PIN_LED_BUILTIN, OUTPUT);
+    #ifdef LED_BUILTIN
+        pinMode(LED_BUILTIN, OUTPUT);
     #endif
 
     // Init Buzzer
-    pinMode(PIN_BUZZER, OUTPUT);
-    digitalWrite(PIN_BUZZER, LOW); // Éteint au démarrage
+    pinMode(BUZZER, OUTPUT);
+    digitalWrite(BUZZER, LOW); // Éteint au démarrage
 
     // Config Bouton BOOT
     btn.attachClick(handleClick);
@@ -349,8 +349,8 @@ void loop() {
         ledState = !ledState;
 
         // Action visuelle selon la carte
-        #ifdef PIN_LED_BUILTIN
-            digitalWrite(PIN_LED_BUILTIN, ledState);
+        #ifdef LED_BUILTIN
+            digitalWrite(LED_BUILTIN, ledState);
         #endif
 
         #ifdef HAS_NEOPIXEL
