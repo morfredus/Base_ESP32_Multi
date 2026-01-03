@@ -95,8 +95,14 @@ void handleFirmwareUploadComplete() {
         server.send(200, "text/html", generateOTAResultPage(false, Update.errorString()));
     } else {
         server.send(200, "text/html", generateOTAResultPage(true, ""));
+
+        // Option 1: Auto-reboot après 1 seconde (défaut)
         delay(1000);
         ESP.restart();
+
+        // Option 2: Redémarrage manuel via bouton web (commentez les 2 lignes ci-dessus et décommentez ci-dessous)
+        // LOG_PRINTLN("✅ OTA réussi. Utilisez le bouton Reboot pour redémarrer.");
+        // La page affichera un bouton "Reboot Now"
     }
 }
 
