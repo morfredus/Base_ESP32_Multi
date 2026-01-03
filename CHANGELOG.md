@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.9.1] - 2026-01-03
+
+### 🐛 Fixed
+
+- **NeoPixel compilation error on ESP32 Classic**: Added automatic fallback mechanism in `main.cpp` that uses `NEOPIXEL_MATRIX` pin when `NEOPIXEL` is not defined in `board_config.h`. This fixes the "'NEOPIXEL' was not declared in this scope" error when compiling for `esp32devkitc` environment with `HAS_NEOPIXEL` enabled.
+
+### 📝 Documentation
+
+- **Enhanced code comments for beginners**:
+  - Added comprehensive Doxygen header to `main.cpp` explaining the project structure
+  - Added detailed NeoPixel fallback explanation with warning about GPIO 2 conflict on ESP32 Classic
+  - Improved `config.h` with step-by-step NeoPixel activation instructions
+  - Added pin mapping summary tables to both README.md and README_FR.md
+
+### 🔄 Changed
+
+- **Version consistency**: Updated PROJECT_VERSION to 0.9.1 across all files:
+  - `platformio.ini`
+  - `main.cpp`
+  - `display.h` / `display.cpp`
+  - `web_interface.h`
+  - `web_pages.h`
+  - `secrets_exemple.h` / `secrets_exemple_FR.h`
+  - `README.md` / `README_FR.md`
+
+### ⚙️ Technical Details
+
+**Root Cause Analysis:**
+- `board_config.h` defines `NEOPIXEL` (GPIO 48) only for ESP32-S3
+- For ESP32 Classic, only `NEOPIXEL_MATRIX` (GPIO 2) was defined
+- When `HAS_NEOPIXEL` was enabled in `config.h` for ESP32 Classic, compilation failed
+
+**Solution:**
+- Added preprocessor fallback in `main.cpp`:
+  ```cpp
+  #ifdef HAS_NEOPIXEL
+      #ifndef NEOPIXEL
+          #ifdef NEOPIXEL_MATRIX
+              #define NEOPIXEL NEOPIXEL_MATRIX
+          #else
+              #error "No NeoPixel pin defined"
+          #endif
+      #endif
+  #endif
+  ```
+
+**Files Modified:**
+- `src/main.cpp` (NeoPixel fallback + Doxygen header)
+- `include/config.h` (enhanced NeoPixel comments)
+- `platformio.ini` (version update)
+- `include/display.h` (version update)
+- `src/display.cpp` (version update)
+- `include/web_interface.h` (version update)
+- `include/web_pages.h` (version update)
+- `include/secrets_exemple.h` (version update)
+- `include/secrets_exemple_FR.h` (version update)
+- `README.md` (version + pin mapping tables)
+- `README_FR.md` (version + pin mapping tables)
+- `CHANGELOG.md` (this file)
+- `CHANGELOG_FR.md` (French version)
+
+---
+
 ## [0.9.0] - 2026-01-03
 
 ### 🚀 Added

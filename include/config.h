@@ -30,11 +30,30 @@
 // Décommenter pour activer le contrôle de la LED RGB standard
 #define HAS_LED_RGB
 
-// --- Configuration NeoPixel (LED RGB adressable) ---
-// Décommenter pour activer la neopixel intégrée
-// Décommentez si vous avez un NeoPixel/WS2812B connecté physiquement
+// ============================================================================
+// Configuration NeoPixel (LED RGB adressable WS2812B / SK6812)
+// ============================================================================
+//
+// POUR ACTIVER LE NEOPIXEL :
+// 1. Décommentez la ligne "#define HAS_NEOPIXEL" ci-dessous
+// 2. Connectez votre NeoPixel au bon GPIO selon votre carte :
+//    - ESP32-S3 : GPIO 48 (défini comme NEOPIXEL dans board_config.h)
+//    - ESP32 Classic : GPIO 2 (utilise NEOPIXEL_MATRIX par défaut)
+//
+// ⚠️ ATTENTION ESP32 CLASSIC :
+//    GPIO 2 est partagé avec LED_BUILTIN. Si vous activez le NeoPixel,
+//    la LED intégrée bleue clignotera de manière erratique.
+//    Solution : Ne pas utiliser digitalWrite(LED_BUILTIN) dans votre code.
+//
+// 💡 ASTUCE : Par défaut, HAS_NEOPIXEL est désactivé pour éviter les
+//    problèmes de crash RMT (Remote Control Module) sur certaines cartes
+//    qui n'ont pas de NeoPixel physiquement connecté.
+//
+// Décommenter pour activer le NeoPixel :
 //#define HAS_NEOPIXEL
-#define NEOPIXEL_NUM     1     // Nombre de neopixels (1 pour le modèle intégré)
+
+// Nombre de LEDs NeoPixel (1 pour une LED unique, 64 pour matrice 8x8, etc.)
+#define NEOPIXEL_NUM     1
 
 // --- Configuration TFT (ST7789 / ILI9341 / autres écrans TFT couleur) ---
 // Décommenter pour activer l'affichage TFT

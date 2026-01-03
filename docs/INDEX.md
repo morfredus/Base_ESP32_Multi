@@ -1,7 +1,7 @@
-# 📚 Documentation Index - v0.8.2
+# 📚 Documentation Index - v0.9.1
 
-**Last update**: December 13, 2025  
-**Project version**: 0.8.2
+**Last update**: January 3, 2026
+**Project version**: 0.9.1
 
 **[Version Française](INDEX_FR.md)** | 🌍 [Bilingual Structure](BILINGUAL_STRUCTURE.md)
 
@@ -19,7 +19,14 @@
 
 ## 📋 Documentation by Version
 
-### Version 0.8.2 (Current)
+### Version 0.9.x (Current)
+- 📘 [CHANGELOG.md](../CHANGELOG.md) - Complete version history
+- 📘 [GETTING_STARTED.md](GETTING_STARTED.md) - Installation guide for beginners
+- 📘 [WIFI_SETUP.md](WIFI_SETUP.md) - Multi-network WiFi configuration
+- 📘 [OTA_UPDATE.md](OTA_UPDATE.md) - OTA updates (Web + ArduinoOTA)
+- 📘 [HARDWARE_SETUP.md](HARDWARE_SETUP.md) - Hardware wiring guide
+
+### Version 0.8.2
 - 📘 [CHANGES_v0.8.2.md](CHANGES_v0.8.2.md) - TFT optimization and Adafruit colors (English)
 - 📘 [CHANGES_v0.8.2_FR.md](CHANGES_v0.8.2_FR.md) - Version française
 - 📘 [UPGRADE_0.8.2.md](UPGRADE_0.8.2.md) - Upgrade guide (English)
@@ -234,14 +241,14 @@ Check [CHANGELOG.md](../CHANGELOG.md) for the latest changes, then read the spec
 
 ---
 
-**Last Version (0.8.2)**
-- 📘 [RELEASE_0.8.2.md](RELEASE_0.8.2.md)
-- 📘 [CHANGES_v0.8.2.md](CHANGES_v0.8.2.md)
-- 📘 [UPGRADE_0.8.2.md](UPGRADE_0.8.2.md)
-- 📘 [COHERENCE_v0.8.2.md](COHERENCE_v0.8.2.md)
-- 📘 [SUMMARY_0.8.2.md](SUMMARY_0.8.2.md)
+**Current Version (0.9.1)**
+- 📘 [CHANGELOG.md](../CHANGELOG.md) - Version history
+- 📘 [GETTING_STARTED.md](GETTING_STARTED.md) - Getting started
+- 📘 [WIFI_SETUP.md](WIFI_SETUP.md) - WiFi configuration
+- 📘 [OTA_UPDATE.md](OTA_UPDATE.md) - OTA updates
+- 📘 [HARDWARE_SETUP.md](HARDWARE_SETUP.md) - Hardware wiring
 
 ---
 
-*Index created on December 13, 2025*  
-*Project version: 0.8.2*
+*Index updated on January 3, 2026*
+*Project version: 0.9.1*
