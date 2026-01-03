@@ -4,10 +4,11 @@
 /**
  * @file web_pages.h
  * @brief Générateur des pages HTML de l'interface web
- * @version 0.6.0
- * 
+ * @version 0.9.0
+ *
  * Module dédié à la génération du contenu HTML de l'interface web.
  * Contient les fonctions pour construire les différentes cartes et sections.
+ * Inclut maintenant la page OTA avec upload de firmware et validations inline.
  */
 
 #include "web_styles.h"
@@ -132,11 +133,219 @@ String generateDashboardPage(
     // --- BOUTONS D'ACTION ---
     html += "<div class='actions'>";
     html += "<button onclick='location.reload()'>🔄 Actualiser</button>";
-    html += "<button class='danger' onclick='if(confirm(\"Êtes-vous sûr de vouloir redémarrer ?\")) fetch(\"/reboot\")'>🔴 Redémarrer</button>";
+    html += "<button onclick='location.href=\"/ota\"'>📡 OTA Update</button>";
+    html += "<button class='danger' id='rebootBtn' onclick='rebootDevice()'>🔴 Redémarrer</button>";
+    html += "<div id='rebootStatus' style='margin-top:10px;display:none;'></div>";
     html += "</div>";
-    
+
+    html += "<script>";
+    html += "function rebootDevice(){";
+    html += "document.getElementById('rebootBtn').disabled=true;";
+    html += "var status=document.getElementById('rebootStatus');";
+    html += "status.style.display='block';";
+    html += "status.style.color='orange';";
+    html += "status.textContent='⏳ Redémarrage en cours...';";
+    html += "fetch('/reboot',{method:'POST'}).then(()=>{";
+    html += "status.style.color='green';";
+    html += "status.textContent='✅ Redémarrage effectué. Reconnexion dans 10s...';";
+    html += "setTimeout(()=>location.reload(),10000);";
+    html += "}).catch(()=>{";
+    html += "status.style.color='red';";
+    html += "status.textContent='❌ Erreur de communication.';";
+    html += "document.getElementById('rebootBtn').disabled=false;";
+    html += "});";
+    html += "}";
+    html += "</script>";
+
     html += "</div></body></html>";
-    
+
+    return html;
+}
+
+/**
+ * @brief Génère la page d'upload OTA
+ * @return String contenant le HTML de la page OTA
+ */
+String generateOTAPage() {
+    String html = "<!DOCTYPE html><html><head>";
+    html += "<meta charset='utf-8'>";
+    html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+    html += "<title>OTA Update - " + String(PROJECT_NAME) + "</title>";
+    html += "<style>" + String(WEB_STYLES) + "</style>";
+    html += "<style>";
+    html += ".upload-zone{border:2px dashed #667eea;border-radius:10px;padding:40px;text-align:center;margin:20px 0;background:#f8f9ff;}";
+    html += ".upload-zone:hover{background:#e8e9ff;border-color:#764ba2;}";
+    html += "input[type=file]{display:none;}";
+    html += ".file-label{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:12px 30px;border-radius:6px;cursor:pointer;display:inline-block;font-weight:600;}";
+    html += ".file-label:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(102,126,234,0.4);}";
+    html += ".status-msg{margin-top:15px;padding:10px;border-radius:6px;display:none;}";
+    html += ".status-msg.info{background:#e3f2fd;color:#1976d2;border-left:4px solid #1976d2;}";
+    html += ".status-msg.success{background:#e8f5e9;color:#388e3c;border-left:4px solid #388e3c;}";
+    html += ".status-msg.error{background:#ffebee;color:#d32f2f;border-left:4px solid #d32f2f;}";
+    html += ".status-msg.warning{background:#fff3e0;color:#f57c00;border-left:4px solid #f57c00;}";
+    html += "</style>";
+    html += "</head><body>";
+    html += "<div class='container'>";
+
+    // Header
+    html += "<div class='header'>";
+    html += "<h1>📡 OTA Update</h1>";
+    html += "<p>" + String(PROJECT_NAME) + " v" + String(PROJECT_VERSION) + "</p>";
+    html += "</div>";
+
+    // Upload form
+    html += "<div class='card'>";
+    html += "<div class='card-title'>Upload Firmware</div>";
+    html += "<form id='uploadForm' enctype='multipart/form-data'>";
+    html += "<div class='upload-zone'>";
+    html += "<p style='font-size:48px;margin:10px 0;'>📦</p>";
+    html += "<h3>Select Firmware File</h3>";
+    html += "<p style='color:#666;margin:10px 0;'>Choose a .bin file to upload</p>";
+    html += "<input type='file' id='fileInput' name='update' accept='.bin'>";
+    html += "<label for='fileInput' class='file-label'>Choose File</label>";
+    html += "<p id='fileName' style='margin-top:15px;font-weight:600;color:#667eea;'></p>";
+    html += "</div>";
+
+    // Status messages (inline validation)
+    html += "<div id='statusMsg' class='status-msg'></div>";
+    html += "<div id='progressBar' style='display:none;margin-top:15px;'>";
+    html += "<div class='progress-label'><span>Upload Progress</span><span id='progressPercent'>0%</span></div>";
+    html += "<div class='progress-bar'><div id='progressFill' class='progress-fill' style='width:0%;'></div></div>";
+    html += "</div>";
+
+    html += "<button type='submit' id='uploadBtn' class='file-label' style='margin-top:20px;width:100%;display:none;'>Upload Firmware</button>";
+    html += "</form>";
+    html += "</div>";
+
+    // Back button
+    html += "<div class='actions'>";
+    html += "<button onclick='location.href=\"/\"'>← Back to Dashboard</button>";
+    html += "</div>";
+
+    // JavaScript
+    html += "<script>";
+    html += "const fileInput=document.getElementById('fileInput');";
+    html += "const fileName=document.getElementById('fileName');";
+    html += "const uploadBtn=document.getElementById('uploadBtn');";
+    html += "const uploadForm=document.getElementById('uploadForm');";
+    html += "const statusMsg=document.getElementById('statusMsg');";
+    html += "const progressBar=document.getElementById('progressBar');";
+    html += "const progressFill=document.getElementById('progressFill');";
+    html += "const progressPercent=document.getElementById('progressPercent');";
+
+    html += "fileInput.addEventListener('change',function(){";
+    html += "if(this.files.length>0){";
+    html += "const file=this.files[0];";
+    html += "fileName.textContent=file.name+' ('+Math.round(file.size/1024)+' KB)';";
+    html += "uploadBtn.style.display='block';";
+    html += "statusMsg.style.display='none';";
+    html += "if(!file.name.endsWith('.bin')){";
+    html += "showStatus('warning','⚠️ Warning: File should be a .bin firmware file');";
+    html += "}";
+    html += "}";
+    html += "});";
+
+    html += "uploadForm.addEventListener('submit',function(e){";
+    html += "e.preventDefault();";
+    html += "if(fileInput.files.length===0){";
+    html += "showStatus('error','❌ Please select a file first');";
+    html += "return;";
+    html += "}";
+    html += "uploadBtn.disabled=true;";
+    html += "fileInput.disabled=true;";
+    html += "const formData=new FormData();";
+    html += "formData.append('update',fileInput.files[0]);";
+    html += "progressBar.style.display='block';";
+    html += "showStatus('info','⏳ Uploading firmware...');";
+
+    html += "const xhr=new XMLHttpRequest();";
+    html += "xhr.upload.addEventListener('progress',function(e){";
+    html += "if(e.lengthComputable){";
+    html += "const percent=Math.round((e.loaded/e.total)*100);";
+    html += "progressFill.style.width=percent+'%';";
+    html += "progressPercent.textContent=percent+'%';";
+    html += "}";
+    html += "});";
+
+    html += "xhr.addEventListener('load',function(){";
+    html += "if(xhr.status===200){";
+    html += "showStatus('success','✅ Upload successful! Device rebooting...');";
+    html += "setTimeout(()=>{location.href='/';},10000);";
+    html += "}else{";
+    html += "showStatus('error','❌ Upload failed. Please try again.');";
+    html += "uploadBtn.disabled=false;";
+    html += "fileInput.disabled=false;";
+    html += "}";
+    html += "});";
+
+    html += "xhr.addEventListener('error',function(){";
+    html += "showStatus('error','❌ Network error. Check connection and try again.');";
+    html += "uploadBtn.disabled=false;";
+    html += "fileInput.disabled=false;";
+    html += "});";
+
+    html += "xhr.open('POST','/update');";
+    html += "xhr.send(formData);";
+    html += "});";
+
+    html += "function showStatus(type,msg){";
+    html += "statusMsg.className='status-msg '+type;";
+    html += "statusMsg.textContent=msg;";
+    html += "statusMsg.style.display='block';";
+    html += "}";
+    html += "</script>";
+
+    html += "</div></body></html>";
+    return html;
+}
+
+/**
+ * @brief Génère la page de résultat OTA
+ * @param success true si l'upload a réussi, false sinon
+ * @param errorMsg Message d'erreur (vide si succès)
+ * @return String contenant le HTML de la page de résultat
+ */
+String generateOTAResultPage(bool success, const char* errorMsg) {
+    String html = "<!DOCTYPE html><html><head>";
+    html += "<meta charset='utf-8'>";
+    html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+    html += "<title>OTA Result - " + String(PROJECT_NAME) + "</title>";
+    html += "<style>" + String(WEB_STYLES) + "</style>";
+    html += "</head><body>";
+    html += "<div class='container'>";
+
+    html += "<div class='header'>";
+    if (success) {
+        html += "<h1 style='color:#4CAF50;'>✅ Update Successful</h1>";
+        html += "<p>Device is rebooting...</p>";
+    } else {
+        html += "<h1 style='color:#f44336;'>❌ Update Failed</h1>";
+        html += "<p>Error: " + String(errorMsg) + "</p>";
+    }
+    html += "</div>";
+
+    html += "<div class='card'>";
+    if (success) {
+        html += "<p>The firmware has been successfully updated.</p>";
+        html += "<p>The device will reboot automatically in a few seconds.</p>";
+        html += "<p>Please wait for reconnection...</p>";
+    } else {
+        html += "<p>The firmware update failed with the following error:</p>";
+        html += "<p style='color:#f44336;font-weight:600;'>" + String(errorMsg) + "</p>";
+        html += "<p>Please check your firmware file and try again.</p>";
+    }
+    html += "</div>";
+
+    html += "<div class='actions'>";
+    if (success) {
+        html += "<script>setTimeout(()=>location.href='/',10000);</script>";
+    } else {
+        html += "<button onclick='location.href=\"/ota\"'>← Try Again</button>";
+        html += "<button onclick='location.href=\"/\"'>Home</button>";
+    }
+    html += "</div>";
+
+    html += "</div></body></html>";
     return html;
 }
 
