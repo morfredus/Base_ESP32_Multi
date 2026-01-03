@@ -35,12 +35,12 @@
 #define HAS_NEOPIXEL
 #define NEOPIXEL_NUM     1     // Nombre de neopixels (1 pour le modèle intégré)
 
-// --- Configuration ST7789 (TFT couleur) ---
-// Décommenter pour activer l'affichage ST7789
+// --- Configuration TFT (ST7789 / ILI9341 / autres écrans TFT couleur) ---
+// Décommenter pour activer l'affichage TFT
 #define HAS_ST7789
-#define ST7789_WIDTH     240   // Largeur de l'écran en pixels
-#define ST7789_HEIGHT    240   // Hauteur de l'écran (240 pour carré, 135 pour rectangulaire)
-#define ST7789_ROTATION  2     // Rotation de l'écran (0, 1, 2, 3)
+#define TFT_WIDTH     240   // Largeur de l'écran en pixels
+#define TFT_HEIGHT    240   // Hauteur de l'écran (240 pour carré, 135 pour rectangulaire, 320 pour ILI9341)
+#define TFT_ROTATION  2     // Rotation de l'écran (0, 1, 2, 3)
 
 // Note : Les couleurs sont définies dans Adafruit_ST77xx.h (ST77XX_BLACK, ST77XX_WHITE, etc.)
 
