@@ -32,7 +32,8 @@
 
 // --- Configuration NeoPixel (LED RGB adressable) ---
 // Décommenter pour activer la neopixel intégrée
-#define HAS_NEOPIXEL
+// Décommentez si vous avez un NeoPixel/WS2812B connecté physiquement
+//#define HAS_NEOPIXEL
 #define NEOPIXEL_NUM     1     // Nombre de neopixels (1 pour le modèle intégré)
 
 // --- Configuration TFT (ST7789 / ILI9341 / autres écrans TFT couleur) ---
