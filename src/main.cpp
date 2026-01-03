@@ -1,7 +1,26 @@
+/**
+ * @file main.cpp
+ * @brief Point d'entrée principal du projet Base_ESP32_Multi
+ * @version 0.9.1
+ * @date 2026-01-03
+ *
+ * Ce fichier contient la logique principale du programme :
+ * - Initialisation du WiFi multi-réseaux
+ * - Gestion des boutons (BOOT, BTN1, BTN2)
+ * - Serveur web avec interface OTA
+ * - Feedback visuel via NeoPixel et écrans (OLED/TFT)
+ *
+ * @note Ce projet supporte 3 environnements PlatformIO :
+ *       - esp32s3_n16r8 : ESP32-S3 avec 16MB Flash / 8MB PSRAM
+ *       - esp32s3_n8r8  : ESP32-S3 avec 8MB Flash / 8MB PSRAM
+ *       - esp32devkitc  : ESP32 Classic avec 4MB Flash
+ */
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiMulti.h>
 #include <WebServer.h>
+#include <ArduinoOTA.h>
 #include <Adafruit_NeoPixel.h>
 #include <OneButton.h>
 
@@ -10,6 +29,32 @@
 #include "secrets.h"
 #include "web_interface.h"
 #include "display.h"
+
+// ============================================================================
+// COMPATIBILITÉ NEOPIXEL - Fallback pour ESP32 Classic
+// ============================================================================
+// Sur ESP32-S3, NEOPIXEL est défini dans board_config.h (GPIO 48)
+// Sur ESP32 Classic, seul NEOPIXEL_MATRIX est défini (GPIO 2)
+//
+// Ce bloc assure la compatibilité en utilisant NEOPIXEL_MATRIX comme fallback
+// si NEOPIXEL n'est pas défini et que HAS_NEOPIXEL est activé.
+//
+// ⚠️ ATTENTION ESP32 Classic : GPIO 2 est partagé avec LED_BUILTIN !
+//    Si vous utilisez un NeoPixel sur ESP32 Classic, désactivez LED_BUILTIN.
+// ============================================================================
+#ifdef HAS_NEOPIXEL
+    #ifndef NEOPIXEL
+        #ifdef NEOPIXEL_MATRIX
+            // Utiliser le pin de la matrice NeoPixel comme fallback
+            #define NEOPIXEL NEOPIXEL_MATRIX
+            // Affiche un avertissement à la compilation (optionnel, commenté par défaut)
+            // #warning "NEOPIXEL non défini dans board_config.h, utilisation de NEOPIXEL_MATRIX"
+        #else
+            // Aucun pin NeoPixel disponible - erreur de configuration
+            #error "HAS_NEOPIXEL est activé mais aucun pin NeoPixel n'est défini dans board_config.h (NEOPIXEL ou NEOPIXEL_MATRIX)"
+        #endif
+    #endif
+#endif
 
 // --- OBJETS ---
 WiFiMulti wifiMulti;
@@ -74,12 +119,12 @@ void handleLongPress() {
             int16_t x1, y1;
             uint16_t w, h;
             display_tft.getTextBounds("REBOOT", 0, 0, &x1, &y1, &w, &h);
-            int centerX = (ST7789_WIDTH - w) / 2;
+            int centerX = (TFT_WIDTH - w) / 2;
             display_tft.setCursor(centerX, 50);
             display_tft.println("REBOOT");
-            
+
             // Barre de progression
-            int barWidth = ST7789_WIDTH - 40;
+            int barWidth = TFT_WIDTH - 40;
             int barHeight = 30;
             int barX = 20;
             int barY = 140;
@@ -126,7 +171,7 @@ void handleLongPress() {
                 display_tft.setTextColor(ST77XX_WHITE);
                 String percentStr = String(progress) + "%";
                 display_tft.getTextBounds(percentStr.c_str(), 0, 0, &x1, &y1, &w, &h);
-                centerX = (ST7789_WIDTH - w) / 2;
+                centerX = (TFT_WIDTH - w) / 2;
                 display_tft.setCursor(centerX, barY + barHeight + 5);
                 display_tft.println(percentStr);
                 
@@ -214,10 +259,23 @@ void handleButton2PressStop() {
 // --- FONCTIONS WIFI ---
 void setupWifi() {
     LOG_PRINTLN("--- Démarrage WiFiMulti ---");
-    int numNetworks = sizeof(WIFI_NETWORKS) / sizeof(WIFI_NETWORKS[0]);
-    
-    for (int i = 0; i < numNetworks; i++) {
-        wifiMulti.addAP(WIFI_NETWORKS[i][0], WIFI_NETWORKS[i][1]);
+
+    // Add WiFi networks (check if SSID is not empty before adding)
+    if (strlen(WIFI_SSID1) > 0) {
+        wifiMulti.addAP(WIFI_SSID1, WIFI_PASS1);
+        LOG_PRINTF("  - Réseau ajouté : %s\n", WIFI_SSID1);
+    }
+    if (strlen(WIFI_SSID2) > 0) {
+        wifiMulti.addAP(WIFI_SSID2, WIFI_PASS2);
+        LOG_PRINTF("  - Réseau ajouté : %s\n", WIFI_SSID2);
+    }
+    if (strlen(WIFI_SSID3) > 0) {
+        wifiMulti.addAP(WIFI_SSID3, WIFI_PASS3);
+        LOG_PRINTF("  - Réseau ajouté : %s\n", WIFI_SSID3);
+    }
+    if (strlen(WIFI_SSID4) > 0) {
+        wifiMulti.addAP(WIFI_SSID4, WIFI_PASS4);
+        LOG_PRINTF("  - Réseau ajouté : %s\n", WIFI_SSID4);
     }
 
     LOG_PRINT("Connexion WiFi en cours...");
@@ -261,6 +319,133 @@ void setupWifi() {
         LOG_PRINTLN(" Echec !");
         displayWifiFailed();
     }
+}
+
+// --- FONCTIONS OTA ---
+void setupOTA() {
+    LOG_PRINTLN("--- Configuration ArduinoOTA ---");
+
+    // Port (defaults to 3232)
+    ArduinoOTA.setPort(3232);
+
+    // Hostname (defaults to esp32-[MAC])
+    ArduinoOTA.setHostname(PROJECT_NAME);
+
+    // Password can be set with it's md5 value as well
+    // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+    // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+    // If you want password protection, uncomment the line below:
+    // ArduinoOTA.setPassword("admin");
+
+    ArduinoOTA.onStart([]() {
+        String type;
+        if (ArduinoOTA.getCommand() == U_FLASH) {
+            type = "sketch";
+        } else {  // U_SPIFFS
+            type = "filesystem";
+        }
+        LOG_PRINTLN("OTA: Début de la mise à jour " + type);
+
+        #ifdef HAS_ST7789
+            display_tft.fillScreen(ST77XX_BLACK);
+            display_tft.setTextSize(2);
+            display_tft.setTextColor(ST77XX_CYAN);
+            display_tft.setCursor(20, 100);
+            display_tft.println("OTA Update...");
+            display_tft.setCursor(20, 130);
+            display_tft.setTextColor(ST77XX_WHITE);
+            display_tft.println(type);
+        #endif
+
+        #ifdef HAS_NEOPIXEL
+            pixels.setPixelColor(0, pixels.Color(0, 0, 255)); // Bleu pour OTA
+            pixels.show();
+        #endif
+    });
+
+    ArduinoOTA.onEnd([]() {
+        LOG_PRINTLN("\nOTA: Mise à jour terminée");
+
+        #ifdef HAS_ST7789
+            display_tft.fillScreen(ST77XX_BLACK);
+            display_tft.setTextSize(2);
+            display_tft.setTextColor(ST77XX_GREEN);
+            display_tft.setCursor(20, 100);
+            display_tft.println("OTA Complete!");
+            display_tft.setCursor(20, 130);
+            display_tft.setTextColor(ST77XX_WHITE);
+            display_tft.println("Rebooting...");
+        #endif
+
+        #ifdef HAS_NEOPIXEL
+            pixels.setPixelColor(0, pixels.Color(0, 255, 0)); // Vert pour succès
+            pixels.show();
+        #endif
+    });
+
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+        unsigned int percent = (progress / (total / 100));
+        LOG_PRINTF("OTA Progress: %u%%\r", percent);
+
+        #ifdef HAS_ST7789
+            // Barre de progression
+            int barWidth = TFT_WIDTH - 40;
+            int barHeight = 20;
+            int barX = 20;
+            int barY = 170;
+
+            // Efface la zone de la barre
+            display_tft.fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 25, ST77XX_BLACK);
+
+            // Contour de la barre
+            display_tft.drawRect(barX, barY, barWidth, barHeight, ST77XX_WHITE);
+
+            // Remplissage de la progression
+            int fillWidth = (barWidth - 4) * percent / 100;
+            if (fillWidth > 0) {
+                display_tft.fillRect(barX + 2, barY + 2, fillWidth, barHeight - 4, ST77XX_CYAN);
+            }
+
+            // Pourcentage
+            display_tft.setTextSize(1);
+            display_tft.setTextColor(ST77XX_WHITE);
+            String percentStr = String(percent) + "%";
+            int16_t x1, y1;
+            uint16_t w, h;
+            display_tft.getTextBounds(percentStr.c_str(), 0, 0, &x1, &y1, &w, &h);
+            int centerX = (TFT_WIDTH - w) / 2;
+            display_tft.fillRect(0, barY + barHeight + 5, TFT_WIDTH, 15, ST77XX_BLACK);
+            display_tft.setCursor(centerX, barY + barHeight + 8);
+            display_tft.println(percentStr);
+        #endif
+    });
+
+    ArduinoOTA.onError([](ota_error_t error) {
+        LOG_PRINTF("OTA Error[%u]: ", error);
+        if (error == OTA_AUTH_ERROR) LOG_PRINTLN("Auth Failed");
+        else if (error == OTA_BEGIN_ERROR) LOG_PRINTLN("Begin Failed");
+        else if (error == OTA_CONNECT_ERROR) LOG_PRINTLN("Connect Failed");
+        else if (error == OTA_RECEIVE_ERROR) LOG_PRINTLN("Receive Failed");
+        else if (error == OTA_END_ERROR) LOG_PRINTLN("End Failed");
+
+        #ifdef HAS_ST7789
+            display_tft.fillScreen(ST77XX_BLACK);
+            display_tft.setTextSize(2);
+            display_tft.setTextColor(ST77XX_RED);
+            display_tft.setCursor(20, 100);
+            display_tft.println("OTA ERROR!");
+        #endif
+
+        #ifdef HAS_NEOPIXEL
+            pixels.setPixelColor(0, pixels.Color(255, 0, 0)); // Rouge pour erreur
+            pixels.show();
+        #endif
+    });
+
+    ArduinoOTA.begin();
+    LOG_PRINTLN("ArduinoOTA prêt");
+    LOG_PRINTF("Hostname: %s\n", PROJECT_NAME);
+    LOG_PRINTF("IP: %s\n", WiFi.localIP().toString().c_str());
 }
 
 // --- SETUP ---
@@ -319,11 +504,12 @@ void setup() {
     btn2.setPressMs(50);  // Très court délai pour détecter l'appui immédiat
 
     setupWifi();
-    
-    // Démarrage Serveur Web
+
+    // Configuration OTA et Serveur Web si WiFi connecté
     if(WiFi.status() == WL_CONNECTED) {
-        setupWebServer();  // Module délégué dans web_interface.h
-        delay(3000); // Laisser le temps de voir l'IP sur les écrans
+        setupOTA();         // Configuration ArduinoOTA
+        setupWebServer();   // Module délégué dans web_interface.h
+        delay(3000);        // Laisser le temps de voir l'IP sur les écrans
     }
 }
 
@@ -334,15 +520,18 @@ void loop() {
     btn1.tick();  // Bouton 1 - RGB
     btn2.tick();  // Bouton 2 - Buzzer
 
-    // 2. Gestion Serveur Web
+    // 2. Gestion ArduinoOTA
+    ArduinoOTA.handle();
+
+    // 3. Gestion Serveur Web
     server.handleClient();
 
-    // 3. Gestion WiFi (Reconnexion auto)
+    // 4. Gestion WiFi (Reconnexion auto)
     if(wifiMulti.run() != WL_CONNECTED) {
         // Optionnel : Gestion LED rouge si perte de connexion
     }
 
-    // 4. Heartbeat Non-Bloquant (remplace delay)
+    // 5. Heartbeat Non-Bloquant (remplace delay)
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= interval) {
         previousMillis = currentMillis;
