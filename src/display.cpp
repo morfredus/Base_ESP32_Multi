@@ -1,7 +1,7 @@
 /**
  * @file display.cpp
  * @brief Implémentation du module de gestion des écrans
- * @version 0.9.0
+ * @version 0.9.1
  * @date 2026-01-03
  */
 

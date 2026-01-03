@@ -1,3 +1,21 @@
+/**
+ * @file main.cpp
+ * @brief Point d'entrée principal du projet Base_ESP32_Multi
+ * @version 0.9.1
+ * @date 2026-01-03
+ *
+ * Ce fichier contient la logique principale du programme :
+ * - Initialisation du WiFi multi-réseaux
+ * - Gestion des boutons (BOOT, BTN1, BTN2)
+ * - Serveur web avec interface OTA
+ * - Feedback visuel via NeoPixel et écrans (OLED/TFT)
+ *
+ * @note Ce projet supporte 3 environnements PlatformIO :
+ *       - esp32s3_n16r8 : ESP32-S3 avec 16MB Flash / 8MB PSRAM
+ *       - esp32s3_n8r8  : ESP32-S3 avec 8MB Flash / 8MB PSRAM
+ *       - esp32devkitc  : ESP32 Classic avec 4MB Flash
+ */
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiMulti.h>
@@ -11,6 +29,32 @@
 #include "secrets.h"
 #include "web_interface.h"
 #include "display.h"
+
+// ============================================================================
+// COMPATIBILITÉ NEOPIXEL - Fallback pour ESP32 Classic
+// ============================================================================
+// Sur ESP32-S3, NEOPIXEL est défini dans board_config.h (GPIO 48)
+// Sur ESP32 Classic, seul NEOPIXEL_MATRIX est défini (GPIO 2)
+//
+// Ce bloc assure la compatibilité en utilisant NEOPIXEL_MATRIX comme fallback
+// si NEOPIXEL n'est pas défini et que HAS_NEOPIXEL est activé.
+//
+// ⚠️ ATTENTION ESP32 Classic : GPIO 2 est partagé avec LED_BUILTIN !
+//    Si vous utilisez un NeoPixel sur ESP32 Classic, désactivez LED_BUILTIN.
+// ============================================================================
+#ifdef HAS_NEOPIXEL
+    #ifndef NEOPIXEL
+        #ifdef NEOPIXEL_MATRIX
+            // Utiliser le pin de la matrice NeoPixel comme fallback
+            #define NEOPIXEL NEOPIXEL_MATRIX
+            // Affiche un avertissement à la compilation (optionnel, commenté par défaut)
+            // #warning "NEOPIXEL non défini dans board_config.h, utilisation de NEOPIXEL_MATRIX"
+        #else
+            // Aucun pin NeoPixel disponible - erreur de configuration
+            #error "HAS_NEOPIXEL est activé mais aucun pin NeoPixel n'est défini dans board_config.h (NEOPIXEL ou NEOPIXEL_MATRIX)"
+        #endif
+    #endif
+#endif
 
 // --- OBJETS ---
 WiFiMulti wifiMulti;

@@ -7,6 +7,69 @@ et ce projet adhère au [Versionnage Sémantique](https://semver.org/lang/fr/spe
 
 ---
 
+## [0.9.1] - 2026-01-03
+
+### 🐛 Corrigé
+
+- **Erreur de compilation NeoPixel sur ESP32 Classic** : Ajout d'un mécanisme de fallback automatique dans `main.cpp` qui utilise le pin `NEOPIXEL_MATRIX` quand `NEOPIXEL` n'est pas défini dans `board_config.h`. Cela corrige l'erreur "'NEOPIXEL' was not declared in this scope" lors de la compilation pour l'environnement `esp32devkitc` avec `HAS_NEOPIXEL` activé.
+
+### 📝 Documentation
+
+- **Commentaires améliorés pour les débutants** :
+  - Ajout d'un en-tête Doxygen complet dans `main.cpp` expliquant la structure du projet
+  - Ajout d'explications détaillées sur le fallback NeoPixel avec avertissement sur le conflit GPIO 2 sur ESP32 Classic
+  - Amélioration de `config.h` avec instructions étape par étape pour activer le NeoPixel
+  - Ajout de tableaux récapitulatifs des pins dans README.md et README_FR.md
+
+### 🔄 Modifié
+
+- **Cohérence de version** : Mise à jour de PROJECT_VERSION vers 0.9.1 dans tous les fichiers :
+  - `platformio.ini`
+  - `main.cpp`
+  - `display.h` / `display.cpp`
+  - `web_interface.h`
+  - `web_pages.h`
+  - `secrets_exemple.h` / `secrets_exemple_FR.h`
+  - `README.md` / `README_FR.md`
+
+### ⚙️ Détails Techniques
+
+**Analyse de la cause racine :**
+- `board_config.h` définit `NEOPIXEL` (GPIO 48) uniquement pour ESP32-S3
+- Pour ESP32 Classic, seul `NEOPIXEL_MATRIX` (GPIO 2) était défini
+- Quand `HAS_NEOPIXEL` était activé dans `config.h` pour ESP32 Classic, la compilation échouait
+
+**Solution :**
+- Ajout d'un fallback préprocesseur dans `main.cpp` :
+  ```cpp
+  #ifdef HAS_NEOPIXEL
+      #ifndef NEOPIXEL
+          #ifdef NEOPIXEL_MATRIX
+              #define NEOPIXEL NEOPIXEL_MATRIX
+          #else
+              #error "Aucun pin NeoPixel défini"
+          #endif
+      #endif
+  #endif
+  ```
+
+**Fichiers modifiés :**
+- `src/main.cpp` (fallback NeoPixel + en-tête Doxygen)
+- `include/config.h` (commentaires NeoPixel améliorés)
+- `platformio.ini` (mise à jour version)
+- `include/display.h` (mise à jour version)
+- `src/display.cpp` (mise à jour version)
+- `include/web_interface.h` (mise à jour version)
+- `include/web_pages.h` (mise à jour version)
+- `include/secrets_exemple.h` (mise à jour version)
+- `include/secrets_exemple_FR.h` (mise à jour version)
+- `README.md` (version + tableaux pins)
+- `README_FR.md` (version + tableaux pins)
+- `CHANGELOG.md` (version anglaise)
+- `CHANGELOG_FR.md` (ce fichier)
+
+---
+
 ## [0.9.0] - 2026-01-03
 
 ### 🚀 Ajouté

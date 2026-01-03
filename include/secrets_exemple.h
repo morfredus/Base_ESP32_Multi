@@ -1,7 +1,7 @@
 /**
  * @file secrets_exemple.h
  * @brief Example configuration file for WiFi credentials
- * @version 0.9.0
+ * @version 0.9.1
  *
  * IMPORTANT: This is an EXAMPLE file. You must:
  * 1. Copy this file to 'secrets.h' in the same directory

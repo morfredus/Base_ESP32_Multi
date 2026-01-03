@@ -1,7 +1,7 @@
 /**
  * @file display.h
  * @brief Module de gestion centralisée des écrans (OLED et TFT)
- * @version 0.9.0
+ * @version 0.9.1
  * @date 2026-01-03
  *
  * Ce module fournit une interface unifiée pour gérer l'affichage

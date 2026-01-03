@@ -1,7 +1,7 @@
 /**
  * @file secrets_exemple.h
  * @brief Fichier de configuration exemple pour les identifiants WiFi
- * @version 0.9.0
+ * @version 0.9.1
  *
  * IMPORTANT : Ceci est un fichier EXEMPLE. Vous devez :
  * 1. Copier ce fichier vers 'secrets.h' dans le même répertoire

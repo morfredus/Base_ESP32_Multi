@@ -4,7 +4,7 @@
 /**
  * @file web_pages.h
  * @brief Générateur des pages HTML de l'interface web
- * @version 0.9.0
+ * @version 0.9.1
  *
  * Module dédié à la génération du contenu HTML de l'interface web.
  * Contient les fonctions pour construire les différentes cartes et sections.
