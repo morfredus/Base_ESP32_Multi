@@ -16,7 +16,6 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "config.h"
-#include "board_config.h"
 
 // Includes conditionnels selon les écrans activés
 #ifdef HAS_OLED

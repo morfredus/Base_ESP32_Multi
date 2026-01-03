@@ -2,14 +2,13 @@
 #include <WiFi.h>
 #include <WiFiMulti.h>
 #include <WebServer.h>
-#include <Adafruit_NeoPixel.h>
 #include <OneButton.h>
 
 #include "config.h"
-#include "board_config.h"
 #include "secrets.h"
 #include "web_interface.h"
 #include "display.h"
+#include "neopixel.h"
 
 // --- OBJETS ---
 WiFiMulti wifiMulti;
@@ -17,10 +16,6 @@ WebServer server(80);
 OneButton btn(PIN_BUTTON_BOOT, true); // true = Active Low (Bouton poussoir standard vers GND)
 OneButton btn1(PIN_BUTTON_1, true);   // Bouton 1 - Cycle RGB
 OneButton btn2(PIN_BUTTON_2, true);   // Bouton 2 - Buzzer
-
-#ifdef HAS_NEOPIXEL
-    Adafruit_NeoPixel pixels(NEOPIXEL_NUM, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
-#endif
 
 // --- VARIABLES GLOBALES ---
 unsigned long previousMillis = 0;
@@ -51,9 +46,8 @@ void handleLongPress() {
     LOG_PRINTLN(">> APPUI LONG détecté ! Redémarrage...");
     isRebooting = true; // Marquer le début du reboot
     
-    #ifdef HAS_NEOPIXEL
-        pixels.setPixelColor(0, pixels.Color(128, 0, 128)); // Violet pour confirmer le reboot
-        pixels.show();
+    #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
+        setInternalPixelColor(COLOR_PURPLE); // Violet pour confirmer le reboot
     #endif
     
     #if defined(HAS_OLED) || defined(HAS_ST7789)
@@ -225,9 +219,8 @@ void setupWifi() {
     // Affichage initial sur les écrans
     displayWifiProgress(0);
     
-    #ifdef HAS_NEOPIXEL
-        pixels.setPixelColor(0, pixels.Color(50, 50, 0)); // Jaune
-        pixels.show();
+    #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
+        setInternalPixelColor(COLOR_YELLOW); // Jaune - connexion en cours
     #endif
 
     // Tentatives de connexion avec affichage de la progression
@@ -252,10 +245,9 @@ void setupWifi() {
         
         // Affichage des infos de connexion sur les écrans
         displayWifiConnected(WiFi.SSID().c_str(), WiFi.localIP());
-        
-        #ifdef HAS_NEOPIXEL
-            pixels.setPixelColor(0, pixels.Color(0, 50, 0)); // Vert
-            pixels.show();
+
+        #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
+            setInternalPixelColor(COLOR_GREEN); // Vert - connecte
         #endif
     } else {
         LOG_PRINTLN(" Echec !");
@@ -287,13 +279,8 @@ void setup() {
         digitalWrite(PIN_LED_BLUE, LOW);
     #endif
 
-    // Init NeoPixel
-    #ifdef HAS_NEOPIXEL
-        pixels.begin();
-        pixels.setBrightness(30);
-        pixels.clear();
-        pixels.show();
-    #endif
+    // Init NeoPixels (LED interne + Matrice 8x8)
+    setupNeoPixels();
 
     // Init LED Builtin (si existante)
     #ifdef PIN_LED_BUILTIN
@@ -353,19 +340,18 @@ void loop() {
             digitalWrite(PIN_LED_BUILTIN, ledState);
         #endif
 
-        #ifdef HAS_NEOPIXEL
-            // Gérer la neopixel selon les états WiFi et reboot
+        #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
+            // Gerer la neopixel interne selon les etats WiFi et reboot
             if (!isRebooting) {  // Si pas en mode reboot
                 if(wifiMulti.run() == WL_CONNECTED) {
-                    // WiFi connecté : heartbeat vert
-                    pixels.setPixelColor(0, ledState ? pixels.Color(0, 100, 0) : pixels.Color(0, 20, 0)); // Vert fort / Vert faible
+                    // WiFi connecte : heartbeat vert
+                    internalPixelHeartbeat(COLOR_GREEN, ledState);
                 } else {
-                    // WiFi non connecté : heartbeat rouge (recherche ou hors ligne)
-                    pixels.setPixelColor(0, ledState ? pixels.Color(100, 0, 0) : pixels.Color(20, 0, 0)); // Rouge fort / faible
+                    // WiFi non connecte : heartbeat rouge (recherche ou hors ligne)
+                    internalPixelHeartbeat(COLOR_RED, ledState);
                 }
             }
-            // Si isRebooting == true, la neopixel reste violet (déjà défini dans handleLongPress)
-            pixels.show();
+            // Si isRebooting == true, la neopixel reste violet (deja defini dans handleLongPress)
         #endif
     }
 }
