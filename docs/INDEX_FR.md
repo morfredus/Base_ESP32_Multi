@@ -1,7 +1,7 @@
-# 📚 Index de la Documentation - v0.9.1
+# 📚 Index de la Documentation - v0.8.2
 
-**Dernière mise à jour** : 3 janvier 2026
-**Version du projet** : 0.9.1
+**Dernière mise à jour** : 13 décembre 2025  
+**Version du projet** : 0.8.2
 
 **[English Version](INDEX.md)** | 🌍 [Structure Bilingue](BILINGUAL_STRUCTURE.md)
 
@@ -19,14 +19,7 @@
 
 ## 📋 Documentation par Version
 
-### Version 0.9.x (Actuelle)
-- 📘 [CHANGELOG_FR.md](../CHANGELOG_FR.md) - Historique complet des versions
-- 📘 [GETTING_STARTED_FR.md](GETTING_STARTED_FR.md) - Guide d'installation pour débutants
-- 📘 [WIFI_SETUP_FR.md](WIFI_SETUP_FR.md) - Configuration WiFi multi-réseaux
-- 📘 [OTA_UPDATE_FR.md](OTA_UPDATE_FR.md) - Mises à jour OTA (Web + ArduinoOTA)
-- 📘 [HARDWARE_SETUP_FR.md](HARDWARE_SETUP_FR.md) - Guide de câblage matériel
-
-### Version 0.8.2
+### Version 0.8.2 (Actuelle)
 - 📘 [CHANGES_v0.8.2.md](CHANGES_v0.8.2.md) - Optimisation TFT et couleurs Adafruit
 - 📘 [UPGRADE_0.8.2.md](UPGRADE_0.8.2.md) - Guide de mise à jour
 - 📘 [COHERENCE_v0.8.2.md](COHERENCE_v0.8.2.md) - Vérification de cohérence
@@ -229,12 +222,12 @@ Projet/
 - 📘 [UPGRADE_0.8.2.md](UPGRADE_0.8.2.md)
 - 📘 [COHERENCE_v0.8.2.md](COHERENCE_v0.8.2onfig.h)
 
-### Version Actuelle (0.9.1)
-- 📘 [CHANGELOG_FR.md](../CHANGELOG_FR.md) - Historique des versions
-- 📘 [GETTING_STARTED_FR.md](GETTING_STARTED_FR.md) - Démarrage rapide
-- 📘 [WIFI_SETUP_FR.md](WIFI_SETUP_FR.md) - Configuration WiFi
-- 📘 [OTA_UPDATE_FR.md](OTA_UPDATE_FR.md) - Mises à jour OTA
-- 📘 [HARDWARE_SETUP_FR.md](HARDWARE_SETUP_FR.md) - Câblage matériel
+### Dernière Version (0.8.2)
+- 📘 [RELEASE_0.8.2.md](RELEASE_0.8.2.md)
+- 📘 [CHANGES_v0.8.2.md](CHANGES_v0.8.2.md)
+- 📘 [UPGRADE_0.8.2.md](UPGRADE_0.8.2.md)
+- 📘 [COHERENCE_v0.8.2.md](COHERENCE_v0.8.2.md)
+- 📘 [SUMMARY_0.8.2.md](SUMMARY_0.8.2.md)
 
 ### Guides Pratiques
 - 🎓 [PIN_MAPPING.md](PIN_MAPPING.md)
@@ -303,5 +296,5 @@ Projet/
 
 ---
 
-*Index mis à jour le 3 janvier 2026*
-*Version du projet : 0.9.1*
+*Index créé le 13 décembre 2025*  
+*Version du projet : 0.8.2*

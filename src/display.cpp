@@ -1,8 +1,8 @@
 /**
  * @file display.cpp
  * @brief Implémentation du module de gestion des écrans
- * @version 0.9.1
- * @date 2026-01-03
+ * @version 0.8.2
+ * @date 2025-12-13
  */
 
 #include "display.h"
@@ -13,8 +13,8 @@
 #endif
 
 #ifdef HAS_ST7789
-    // Adafruit_ST7789 display_tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
-    Adafruit_ST7789 display_tft = Adafruit_ST7789(&SPI, TFT_CS, TFT_DC, TFT_RST);
+    // Adafruit_ST7789 display_tft = Adafruit_ST7789(PIN_TFT_CS, PIN_TFT_DC, PIN_TFT_RST);
+    Adafruit_ST7789 display_tft = Adafruit_ST7789(&SPI, PIN_TFT_CS, PIN_TFT_DC, PIN_TFT_RST);
 #endif
 
 // =============================================================================
@@ -93,7 +93,7 @@ void displayWifiFailed() {
 
 #ifdef HAS_OLED
 bool setupOled() {
-    Wire.begin(I2C_SDA, I2C_SCL);
+    Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
     
     if (!display_oled.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR)) {
         return false;
@@ -158,15 +158,15 @@ void updateOledConnected(const char* ssid, IPAddress ip) {
 #ifdef HAS_ST7789
 bool setupST7789() {
     // Initialisation du SPI matériel
-    SPI.begin(TFT_SCLK, -1, TFT_MOSI, TFT_CS);
+    SPI.begin(PIN_TFT_SCLK, -1, PIN_TFT_MOSI, PIN_TFT_CS);
     
     // Configuration du backlight
-    pinMode(TFT_BL, OUTPUT);
-    digitalWrite(TFT_BL, HIGH); // Allume le rétroéclairage
+    pinMode(PIN_TFT_BL, OUTPUT);
+    digitalWrite(PIN_TFT_BL, HIGH); // Allume le rétroéclairage
     
     // Initialisation du TFT
-    display_tft.init(TFT_WIDTH, TFT_HEIGHT);
-    display_tft.setRotation(TFT_ROTATION);
+    display_tft.init(ST7789_WIDTH, ST7789_HEIGHT);
+    display_tft.setRotation(ST7789_ROTATION);
     display_tft.fillScreen(ST77XX_BLACK);
     
     return true; // ST7789 ne retourne pas d'erreur, on suppose qu'il est présent
@@ -181,58 +181,58 @@ void displayST7789Startup(const char* projectName, const char* projectVersion) {
     int16_t x1, y1;
     uint16_t w, h;
     display_tft.getTextBounds(projectName, 0, 0, &x1, &y1, &w, &h);
-    int centerX = (TFT_WIDTH - w) / 2;
-
+    int centerX = (ST7789_WIDTH - w) / 2;
+    
     display_tft.setCursor(centerX, 80);
     display_tft.println(projectName);
-
+    
     // Version
     display_tft.setTextSize(2);
     display_tft.setTextColor(ST77XX_WHITE);
     String versionStr = "v" + String(projectVersion);
     display_tft.getTextBounds(versionStr.c_str(), 0, 0, &x1, &y1, &w, &h);
-    centerX = (TFT_WIDTH - w) / 2;
+    centerX = (ST7789_WIDTH - w) / 2;
     display_tft.setCursor(centerX, 120);
     display_tft.println(versionStr);
 }
 
 void displayST7789Progress(int progress) {
     // Zone pour le texte de statut
-    display_tft.fillRect(0, 40, TFT_WIDTH, 30, ST77XX_BLACK);
+    display_tft.fillRect(0, 40, ST7789_WIDTH, 30, ST77XX_BLACK);
     display_tft.setTextSize(2);
     display_tft.setTextColor(ST77XX_YELLOW);
-
+    
     int16_t x1, y1;
     uint16_t w, h;
     display_tft.getTextBounds("Connexion WiFi...", 0, 0, &x1, &y1, &w, &h);
-    int centerX = (TFT_WIDTH - w) / 2;
+    int centerX = (ST7789_WIDTH - w) / 2;
     display_tft.setCursor(centerX, 50);
     display_tft.println("Connexion WiFi...");
-
+    
     // Barre de progression
-    int barWidth = TFT_WIDTH - 40;
+    int barWidth = ST7789_WIDTH - 40;
     int barHeight = 30;
     int barX = 20;
     int barY = 160;
-
+    
     // Efface la zone de la barre
     display_tft.fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 20, ST77XX_BLACK);
-
+    
     // Contour de la barre
     display_tft.drawRect(barX, barY, barWidth, barHeight, ST77XX_WHITE);
-
+    
     // Remplissage de la progression
     int fillWidth = (barWidth - 4) * progress / 100;
     if (fillWidth > 0) {
         display_tft.fillRect(barX + 2, barY + 2, fillWidth, barHeight - 4, ST77XX_GREEN);
     }
-
+    
     // Pourcentage
     display_tft.setTextSize(2);
     display_tft.setTextColor(ST77XX_WHITE);
     String percentStr = String(progress) + "%";
     display_tft.getTextBounds(percentStr.c_str(), 0, 0, &x1, &y1, &w, &h);
-    centerX = (TFT_WIDTH - w) / 2;
+    centerX = (ST7789_WIDTH - w) / 2;
     display_tft.setCursor(centerX, barY + barHeight + 5);
     display_tft.println(percentStr);
 }
@@ -246,21 +246,21 @@ void displayST7789Connected(const char* ssid, IPAddress ip) {
     int16_t x1, y1;
     uint16_t w, h;
     display_tft.getTextBounds(PROJECT_NAME, 0, 0, &x1, &y1, &w, &h);
-    int centerX = (TFT_WIDTH - w) / 2;
+    int centerX = (ST7789_WIDTH - w) / 2;
     display_tft.setCursor(centerX, 20);
     display_tft.println(PROJECT_NAME);
-
+    
     // Version
     display_tft.setTextSize(1);
     display_tft.setTextColor(ST77XX_WHITE);
     String versionStr = "v" + String(PROJECT_VERSION);
     display_tft.getTextBounds(versionStr.c_str(), 0, 0, &x1, &y1, &w, &h);
-    centerX = (TFT_WIDTH - w) / 2;
+    centerX = (ST7789_WIDTH - w) / 2;
     display_tft.setCursor(centerX, 45);
     display_tft.println(versionStr);
-
+    
     // Ligne de séparation
-    display_tft.drawLine(20, 60, TFT_WIDTH - 20, 60, ST77XX_CYAN);
+    display_tft.drawLine(20, 60, ST7789_WIDTH - 20, 60, ST77XX_CYAN);
     
     // WiFi connecté
     display_tft.setTextSize(2);
@@ -296,15 +296,15 @@ void displayST7789Failed() {
     int16_t x1, y1;
     uint16_t w, h;
     display_tft.getTextBounds("ERREUR", 0, 0, &x1, &y1, &w, &h);
-    int centerX = (TFT_WIDTH - w) / 2;
-
+    int centerX = (ST7789_WIDTH - w) / 2;
+    
     display_tft.setCursor(centerX, 80);
     display_tft.println("ERREUR");
-
+    
     display_tft.setTextSize(2);
     display_tft.setTextColor(ST77XX_WHITE);
     display_tft.getTextBounds("WiFi Echec", 0, 0, &x1, &y1, &w, &h);
-    centerX = (TFT_WIDTH - w) / 2;
+    centerX = (ST7789_WIDTH - w) / 2;
     display_tft.setCursor(centerX, 120);
     display_tft.println("WiFi Echec");
 }

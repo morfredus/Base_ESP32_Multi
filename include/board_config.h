@@ -71,39 +71,7 @@
 #define SD_CS          1   // Chip Select SD – sortie 3.3V
 
 // ------------------------------------
-// SD Card (SPI partagé)
-// ------------------------------------
-#define SD_MISO      13  // MISO SD – entrée 3.3V
-#define SD_MOSI      11  // MOSI SD – sortie 3.3V
-#define SD_SCLK      12  // Horloge SD – sortie 3.3V
-#define SD_CS         1  // Chip Select SD – sortie 3.3V
-
-
-// ------------------------------------
-// I2C
-// ------------------------------------
-#define I2C_SDA 15  // SDA – open-drain 3.3V, pull-up externe 4.7 kO ? 3.3V
-#define I2C_SCL 16  // SCL – open-drain 3.3V, pull-up externe 4.7 kO ? 3.3V
-
-
-// ------------------------------------
-// LED RGB & NeoPixel
-// ------------------------------------
-#define LED_RED    21 // LED Rouge – sortie 3.3V, résistance série 220–470 O
-#define LED_GREEN  41 // LED Verte – sortie 3.3V, résistance série 220–470 O
-#define LED_BLUE   42 // LED Bleue – sortie 3.3V, résistance série 220–470 O
-#define NEOPIXEL   48 // Data NeoPixel – sortie 3.3V (LED souvent alimentée en 5V)
-
-// NeoPixel Matrix 8x8 (WS2812B-64)
-// Compatible avec matrices LED adressables type WS2812B, WS2811, SK6812
-// Nécessite : Adafruit_NeoPixel ou FastLED
-// Câblage : GPIO → DIN (Data In) de la matrice, GND commun, VCC matrice → 5V externe
-// Note : Pour 64 LEDs à pleine luminosité (blanc 100%), prévoir alimentation 5V/3A minimum
-#define NEOPIXEL_MATRIX 3  // Data Matrix NeoPixel 8x8 – sortie 3.3V (signal), matrice alimentée en 5V
-
-
-// ------------------------------------
-// Boutons
+// MOTOR CONTROLLER TB6612FNG
 // ------------------------------------
 #define M_AIN1        41   // Direction moteur A - Entrée 1
 #define M_AIN2        42   // Direction moteur A - Entrée 2
@@ -211,41 +179,7 @@
 #define SD_CS          5   // Chip Select SD – sortie 3.3V
 
 // ------------------------------------
-// I2C
-// ------------------------------------
-#define I2C_SDA 21  // SDA – open-drain 3.3V, pull-up 4.7 kO
-#define I2C_SCL 22  // SCL – open-drain 3.3V, pull-up 4.7 kO
-
-
-// ------------------------------------
-// SD Card (SPI)
-// ------------------------------------
-#define SD_MISO      19  // MISO SD – entrée 3.3V
-#define SD_MOSI      23  // MOSI SD – sortie 3.3V (partagé avec TFT)
-#define SD_SCLK      18  // Horloge SD – sortie 3.3V (partagé avec TFT)
-#define SD_CS         5  // Chip Select SD – sortie 3.3V
-
-
-// ------------------------------------
-// LED RGB
-// ------------------------------------
-#define LED_RED     13 // LED Rouge – sortie 3.3V, résistance 220–470 O
-#define LED_GREEN   26 // LED Verte – sortie 3.3V, résistance 220–470 O
-#define LED_BLUE    33 // LED Bleue – sortie 3.3V, résistance 220–470 O
-#define LED_BUILTIN  2 // LED intégrée – sortie 3.3V
-
-// NeoPixel Matrix 8x8 (WS2812B-64)
-// Compatible avec matrices LED adressables type WS2812B, WS2811, SK6812
-// Nécessite : Adafruit_NeoPixel ou FastLED
-// Câblage : GPIO → DIN (Data In) de la matrice, GND commun, VCC matrice → 5V externe
-// Note : Pour 64 LEDs à pleine luminosité (blanc 100%), prévoir alimentation 5V/3A minimum
-// ⚠️ ATTENTION : GPIO 2 est partagé avec LED_BUILTIN. Ne pas utiliser les deux simultanément.
-//               Si vous utilisez la matrice NeoPixel, désactivez LED_BUILTIN dans le code.
-#define NEOPIXEL_MATRIX 2  // Data Matrix NeoPixel 8x8 – sortie 3.3V (signal), matrice alimentée en 5V
-
-
-// ------------------------------------
-// Boutons
+// MOTOR CONTROLLER TB6612FNG
 // ------------------------------------
 #define M_AIN1        26   // Direction moteur A - Entrée 1
 #define M_AIN2        25   // Direction moteur A - Entrée 2

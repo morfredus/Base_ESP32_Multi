@@ -1,287 +1,249 @@
-# Journal des modifications
+# Changelog
 
-Tous les changements notables de Base_ESP32_Multi sont documentés dans ce fichier.
+Toutes les modifications notables de ce projet seront documentées dans ce fichier.
 
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
-et ce projet adhère au [Versionnage Sémantique](https://semver.org/lang/fr/spec/v2.0.0.html).
+et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
+
+**[English Version](CHANGELOG.md)**
+
+## [0.8.2] - 2025-12-13
+
+### Modifié
+- ⚡ **Optimisation TFT ST7789** : Utilisation du SPI matériel au lieu du SPI logiciel
+  - Nouvelle déclaration : `Adafruit_ST7789(&SPI, PIN_TFT_CS, PIN_TFT_DC, PIN_TFT_RST)`
+  - Ajout de `SPI.begin()` dans `setupST7789()` pour initialisation explicite
+  - Amélioration des performances d'affichage
+- 🎨 **Couleurs Adafruit** : Utilisation des constantes officielles de la bibliothèque
+  - Remplacement de `COLOR_*` par `ST77XX_*` (ex: `COLOR_BLACK` → `ST77XX_BLACK`)
+  - Suppression des définitions personnalisées dans `config.h`
+  - Cohérence avec les standards de la bibliothèque Adafruit
+
+### Corrigé
+- 🔧 Affichage TFT plus fluide grâce au SPI matériel
+- 📦 Réduction du code avec suppression de 11 lignes de définitions redondantes
+
+### Documentation
+- 📘 [CHANGES_v0.8.2.md](docs/CHANGES_v0.8.2.md) - Documentation technique complète des optimisations
+
+## [0.8.1] - 2025-12-13
+
+### Corrigé
+- 🔧 **Cohérence des noms de pins** : Tous les noms de pins utilisés dans le code correspondent maintenant exactement aux déclarations dans `board_config.h`
+  - `display.cpp` : `TFT_CS`, `TFT_DC`, `TFT_RST`, `TFT_BL` → `PIN_TFT_CS`, `PIN_TFT_DC`, `PIN_TFT_RST`, `PIN_TFT_BL`
+  - `main.cpp` : `DEFAULT_BUZZER_PIN` → `PIN_BUZZER` (conformément à board_config.h)
+  - Ajout de `PIN_LED_BUILTIN` dans board_config.h pour ESP32 Classic (GPIO 2)
+- 📋 **board_config.h** comme référence unique pour tous les noms de pins du projet
+
+### Documentation
+- 📝 Mise à jour de la documentation pour refléter la cohérence des noms de pins
+
+## [0.8.0] - 2025-12-13
+
+### Ajouté
+- 🎮 **Système de contrôle multi-boutons avancé** :
+  - Bouton BOOT : Redémarrage avec barre de progression 2 sec (annulable avant 100%)
+  - Bouton 1 : Cycle RGB (Rouge → Vert → Bleu → Blanc → Éteint)
+  - Bouton 2 : Bip Buzzer à l'appui (1kHz, 100ms)
+- 🎨 **Gestion améliorée de la NeoPixel** :
+  - Violet fixe pendant séquence reboot
+  - Vert heartbeat quand WiFi connecté
+  - Rouge heartbeat quand WiFi déconnecté/recherche
+- 🔊 **Retour sonore** : Buzzer piézo pour feedback utilisateur (Pin 6)
+- 🚨 **Sécurité de redémarrage** : Annulation possible avant 100% avec restauration écran
+- 📊 **Barre de progression TFT** : Affichage en magenta, mise à jour chaque 50ms
+
+### Modifié
+- 🔄 **main.cpp** : Refonte complète de la gestion des boutons
+  - Ajout de 3 objets OneButton (BOOT, BTN1, BTN2)
+  - Nouvelles fonctions callback : `handleButton1Click()`, `handleButton2PressStart()`, `handleButton2PressStop()`
+  - Modification `handleLongPress()` avec logique de reboot à 100%
+  - Amélioration du heartbeat NeoPixel avec condition `isRebooting`
+- ⚙️ **config.h** : Activation des définitions HAS_LED_RGB et HAS_NEOPIXEL
+- 🎯 **Logique reboot** : Vérification directe du pin via `digitalRead()` pour fiabilité
+
+### Corrigé
+- 🐛 LED RGB maintenant controlée correctement (definition HAS_LED_RGB)
+- 🐛 NeoPixel affichant tous les états WiFi + reboot
+- 🐛 Reboot ne se déclenche que si barre à 100% + bouton toujours appuyé
+- 🐛 Restauration automatique de l'écran WiFi après annulation reboot
+
+### Documentation
+- 📋 Ajout de `CHANGES_v0.8.0.md` : Document détaillé des 10 changements numérotés
+- 📊 Tableaux récapitulatifs des pins et comportements
+- 🧪 Section tests effectués avec résultats
+
+## [0.7.0] - 2025-12-06
+
+### Ajouté
+- 🖥️ **Support complet des écrans TFT ST7789** : Affichage couleur haute résolution (240x240 ou 240x135)
+- 📱 **Module display.h/display.cpp** : Architecture modulaire pour gérer OLED et ST7789 de manière unifiée
+- 🎨 **Interface de démarrage graphique** :
+  - Affichage du nom du projet et de la version au boot
+  - Barre de progression visuelle durant la connexion WiFi
+  - Affichage du SSID et de l'adresse IP une fois connecté
+  - Messages d'erreur en cas d'échec de connexion
+- 📚 **Documentation complète pour débutants** :
+  - `docs/PIN_MAPPING.md` : Guide détaillé de connexion des composants
+  - Schémas de câblage pour ESP32-S3 et ESP32 Classic
+  - Tableaux récapitulatifs des GPIO utilisés
+  - Conseils de dépannage et sécurité électrique
+- ⚙️ **Configuration flexible** :
+  - Support simultané OLED + ST7789
+  - Activation/désactivation indépendante via `config.h`
+  - Palette de couleurs prédéfinies (RGB565) pour ST7789
+
+### Modifié
+- 🎨 **main.cpp refactorisé** : Fonctions d'affichage déléguées au module `display.h`
+- 🔧 **Simplification des includes** : Suppression des includes OLED directs dans main.cpp
+- 📦 **platformio.ini** : Activation de la bibliothèque Adafruit ST7789
+- 📏 **Amélioration de board_config.h** : Ajout de commentaires explicatifs pour chaque pin
+
+### Corrigé
+- 🐛 Gestion cohérente de l'affichage entre OLED et ST7789
+- 🐛 Message de redémarrage affiché sur tous les écrans disponibles
+
+### Documentation
+- 📘 Ajout de `docs/PIN_MAPPING.md` : Guide complet de connexion matérielle
+- 📝 Commentaires Doxygen dans `display.h` pour tous les prototypes
+- ✅ Liste de vérification pré-compilation pour débutants
+
+## [0.6.0] - 2025-12-04
+
+### Ajouté
+- 🏗️ **Architecture modulaire pour l'interface web** :
+  - `web_styles.h` : Styles CSS séparé et réutilisable
+  - `web_pages.h` : Générateur HTML avec fonction `generateDashboardPage()`
+  - `web_interface.h` : Handlers HTTP et gestion du serveur web
+- 📚 **Documentation Doxygen complète** : Tous les modules incluent des commentaires Doxygen
+- 🔧 **Meilleure séparation des responsabilités** : Logique métier séparée de la présentation
+- ♻️ **Code réutilisable** : Les fonctions HTML/CSS peuvent être réutilisées dans d'autres projets
+
+### Modifié
+- 🧹 **main.cpp allégé** : De 424 à 271 lignes (36% de réduction)
+- 🎯 **Imports simplifiés** : `#include "web_interface.h"` gère tous les besoins web
+- 🔄 **Handlers délégués** : `handleRoot()`, `handleReboot()` maintenant dans modules dédiés
+- ⚙️ **Fonction setup()** : Utilise maintenant `setupWebServer()` au lieu de config inline
+
+### Corrigé
+- 🐛 Organisation du code pour éviter la duplication
+- 📦 Réduction de l'empreinte du code binaire (moins en RAM, plus en Flash)
+
+### Documentation
+- 📂 **Réorganisation des fichiers de documentation** :
+  - Création du dossier `docs/` pour centraliser la documentation technique
+  - `docs/ARCHITECTURE.md` : Guide technique complet sur la structure modulaire
+  - `docs/UPGRADE_0.6.0.md` : Résumé des changements et étapes de migration
+  - `docs/COHERENCE_CHECK.md` : Vérification de cohérence des versions
+  - `docs/SYNTHESIS.md` : Synthèse complète avec comparaisons avant/après
+- 🎯 **Conformité aux conventions** : README.md et CHANGELOG.md restent à la racine, détails techniques en `docs/`
+- 🔗 **Références croisées** : Tous les fichiers utilisent des chemins relatifs pour portabilité
+
+## [0.5.0] - 2025-12-04
+
+### Ajouté
+- 🎨 **Refonte majeure de l'interface web** : Design moderne avec cartouches (cards)
+- 📱 **Présentation compacte et responsive** : Grille CSS auto-responsive (mobile-friendly)
+- 🎯 **Gradient moderne** : Fond dégradé violet (667eea → 764ba2)
+- 📊 **Meilleure lisibilité** : Organisation des informations par catégories dans des cartes distinctes
+- 🔗 **Séparation des détails réseau** : Carte dédiée pour Masque/Passerelle/DNS
+- ✨ **Animations visuelles** : Hover effects et transitions sur les boutons et cartes
+- 📈 **Barre de signal WiFi** : Conversion dBm en pourcentage avec visualisation par progression
+- ⏱️ **Format uptime amélioré** : Affichage en "Xh Ym Zs" au lieu de simples secondes
+- 🔴 **Boutons redessinés** : Style gradient avec icônes (🔄 Actualiser / 🔴 Redémarrer)
+- 💾 **Monospace pour valeurs techniques** : IP, MAC, Chip ID en police monospace
+- 🌙 **Header en contraste** : Titre et version en blanc sur le gradient
+
+### Modifié
+- 🎨 CSS complètement réécrit pour le design card-based
+- 📐 Structure HTML optimisée pour flexibilité et maintenabilité
+- 🔄 Boutons réorganisés en section "actions" centralisée
+
+### Corrigé
+- 🐛 Amélioration de la lisibilité sur petits écrans
+- 🐛 Consistance visuelle entre tous les éléments de l'interface
+
+## [0.4.0] - 2025-12-04
+
+### Ajouté
+- 📊 Page web enrichie avec informations techniques complètes :
+  - Section Matériel : Board, Chip ID, SDK, Fréquence CPU, Nombre de cœurs
+  - Section Mémoire Flash : Taille, vitesse, mode
+  - Section RAM : Heap et PSRAM avec barres de progression visuelles
+  - Section WiFi : SSID, IP, masque, passerelle, DNS, MAC, signal
+  - Section Système : Uptime, température CPU
+- 🎨 Interface web améliorée avec sections colorées et organisation claire
+- 📊 Barres de progression pour visualiser l'utilisation de la mémoire
+- 🌡️ Affichage de la température du CPU
+
+### Modifié
+- 🎨 Design responsive adapté aux informations supplémentaires
+- ⚠️ Confirmation avant redémarrage via l'interface web
+
+## [0.3.0] - 2025-12-04
+
+### Ajouté
+- 🌐 Serveur web intégré sur le port 80
+- 📄 Page d'accueil affichant les informations système (version, board, WiFi, IP, signal, uptime)
+- 🔄 Bouton de redémarrage via l'interface web
+- 🔧 Fonction de redémarrage opérationnelle via appui long sur le bouton
+
+### Corrigé
+- 🐛 Appui long sur le bouton BOOT maintenant fonctionnel (redémarre l'ESP32)
+- 🐛 Suppression du delay bloquant dans le callback du bouton
+- ✅ Confirmation visuelle sur NeoPixel (violet) et OLED lors du redémarrage
+
+## [0.2.0] - 2025-12-04
+
+### Ajouté
+- ✨ Support des écrans OLED SSD1306 (128x64 pixels)
+- 📊 Affichage automatique du nom du projet et de la version sur l'OLED
+- 📶 Barre de progression visuelle durant la connexion WiFi sur l'OLED
+- 🌐 Affichage du SSID et de l'adresse IP une fois connecté sur l'OLED
+- ⚙️ Configuration simple via `HAS_OLED` dans `config.h`
+- 📚 Librairies Adafruit GFX et Adafruit SSD1306 ajoutées aux dépendances
+
+### Documenté
+- 📖 Section dédiée à la configuration OLED dans le README
+- 🔌 Instructions de connexion I2C pour ESP32-S3 et ESP32 Classic
+- 💡 Guide pour désactiver l'OLED si non utilisé
+- 💡 Guide pour désactiver l'OLED si non utilisé
+
+## [0.1.0] - 2025-12-04
+
+### Ajouté
+- 🔧 Configuration multi-environnements PlatformIO
+  - ESP32-S3 N16R8 (16MB Flash / 8MB PSRAM)
+  - ESP32-S3 N8R8 (8MB Flash / 8MB PSRAM)
+  - ESP32 Classic DevKitC (4MB Flash)
+- 📡 Gestion WiFiMulti avec support de plusieurs réseaux
+- 🔒 Système de secrets (fichier `secrets.h` exclu de Git)
+- 💡 Support NeoPixel (LED RGB sur pin 48 pour ESP32-S3)
+- 🚦 Feedback visuel de l'état WiFi :
+  - Jaune : Connexion en cours
+  - Vert : Connecté
+  - Rouge : Erreur/déconnecté
+- 🔘 Gestion du bouton BOOT avec librairie OneButton
+  - Clic simple : Action personnalisable
+  - Appui long : Action longue personnalisable
+- 📁 Structure de projet modulaire :
+  - `config.h` : Configuration générale
+  - `board_config.h` : Configuration matérielle spécifique
+  - `secrets.h` : Identifiants WiFi (non versionné)
+- 📊 Logs série avec décodeur d'exceptions ESP32
+- ⚡ Compilation optimisée avec C++17
+- 🎯 Heartbeat non-bloquant dans le loop
+
+### Configuration
+- ⚙️ Support PSRAM pour ESP32-S3 (QIO + OPI)
+- 📦 Dossiers de build personnalisés pour optimiser l'espace disque
+- 🚀 Vitesse d'upload configurée à 921600 bauds
+- 🔍 Filtres de monitoring série (timestamps + décodeur d'exceptions)
 
 ---
 
-## [0.9.1] - 2026-01-03
+## Format des versions
 
-### 🐛 Corrigé
-
-- **Erreur de compilation NeoPixel sur ESP32 Classic** : Ajout d'un mécanisme de fallback automatique dans `main.cpp` qui utilise le pin `NEOPIXEL_MATRIX` quand `NEOPIXEL` n'est pas défini dans `board_config.h`. Cela corrige l'erreur "'NEOPIXEL' was not declared in this scope" lors de la compilation pour l'environnement `esp32devkitc` avec `HAS_NEOPIXEL` activé.
-
-### 📝 Documentation
-
-- **Commentaires améliorés pour les débutants** :
-  - Ajout d'un en-tête Doxygen complet dans `main.cpp` expliquant la structure du projet
-  - Ajout d'explications détaillées sur le fallback NeoPixel avec avertissement sur le conflit GPIO 2 sur ESP32 Classic
-  - Amélioration de `config.h` avec instructions étape par étape pour activer le NeoPixel
-  - Ajout de tableaux récapitulatifs des pins dans README.md et README_FR.md
-
-### 🔄 Modifié
-
-- **Cohérence de version** : Mise à jour de PROJECT_VERSION vers 0.9.1 dans tous les fichiers :
-  - `platformio.ini`
-  - `main.cpp`
-  - `display.h` / `display.cpp`
-  - `web_interface.h`
-  - `web_pages.h`
-  - `secrets_exemple.h` / `secrets_exemple_FR.h`
-  - `README.md` / `README_FR.md`
-
-### ⚙️ Détails Techniques
-
-**Analyse de la cause racine :**
-- `board_config.h` définit `NEOPIXEL` (GPIO 48) uniquement pour ESP32-S3
-- Pour ESP32 Classic, seul `NEOPIXEL_MATRIX` (GPIO 2) était défini
-- Quand `HAS_NEOPIXEL` était activé dans `config.h` pour ESP32 Classic, la compilation échouait
-
-**Solution :**
-- Ajout d'un fallback préprocesseur dans `main.cpp` :
-  ```cpp
-  #ifdef HAS_NEOPIXEL
-      #ifndef NEOPIXEL
-          #ifdef NEOPIXEL_MATRIX
-              #define NEOPIXEL NEOPIXEL_MATRIX
-          #else
-              #error "Aucun pin NeoPixel défini"
-          #endif
-      #endif
-  #endif
-  ```
-
-**Fichiers modifiés :**
-- `src/main.cpp` (fallback NeoPixel + en-tête Doxygen)
-- `include/config.h` (commentaires NeoPixel améliorés)
-- `platformio.ini` (mise à jour version)
-- `include/display.h` (mise à jour version)
-- `src/display.cpp` (mise à jour version)
-- `include/web_interface.h` (mise à jour version)
-- `include/web_pages.h` (mise à jour version)
-- `include/secrets_exemple.h` (mise à jour version)
-- `include/secrets_exemple_FR.h` (mise à jour version)
-- `README.md` (version + tableaux pins)
-- `README_FR.md` (version + tableaux pins)
-- `CHANGELOG.md` (version anglaise)
-- `CHANGELOG_FR.md` (ce fichier)
-
----
-
-## [0.9.0] - 2026-01-03
-
-### 🚀 Ajouté
-
-#### Système WiFi
-- **Configuration WiFi multi-réseaux avec variables individuelles** (#1)
-  - Nouveau format : `WIFI_SSID1`/`WIFI_PASS1`, `WIFI_SSID2`/`WIFI_PASS2`, etc.
-  - Remplace l'ancien format tableau `WIFI_NETWORKS[][2]`
-  - Jusqu'à 4 réseaux supportés par défaut (facilement extensible)
-  - Créé `secrets_exemple.h` (EN) et `secrets_exemple_FR.h` (FR) templates
-  - Connexion automatique au réseau disponible le plus fort
-  - Basculement automatique entre réseaux
-
-#### Mises à jour OTA
-- **Mises à jour réseau ArduinoOTA** (#1)
-  - Mises à jour OTA via Arduino IDE/PlatformIO
-  - Port 3232 (port standard ArduinoOTA)
-  - Retour visuel sur écran TFT pendant l'OTA
-  - Indicateurs NeoPixel colorés (Bleu = mise à jour, Vert = succès, Rouge = erreur)
-  - Barre de progression avec pourcentage et temps estimé
-  - Gestion d'erreurs détaillée et logs
-
-- **Interface OTA Web** (#2)
-  - Nouvelle page `/ota` pour téléversement firmware via navigateur
-  - Support glisser-déposer fichiers `.bin`
-  - Suivi progression en temps réel avec XMLHttpRequest
-  - Validation fichier (vérification extension `.bin`)
-  - Messages statut inline (pas de popups)
-  - Redirection auto après téléversement réussi
-  - Gestion complète erreurs avec messages conviviaux
-
-#### Support Matériel
-- **Attribution GPIO Matrice NeoPixel 8×8** (#1)
-  - ESP32-S3 : GPIO 3 pour Matrice NeoPixel (WS2812B-64)
-  - ESP32 Classic : GPIO 2 pour Matrice NeoPixel (⚠️ conflit avec LED_BUILTIN)
-  - Documentation exigences alimentation matrice 64 LEDs (3A @ 5V)
-  - Code exemple compatible bibliothèque Adafruit_NeoMatrix
-
-#### Documentation
-- **Guides complets beginner-friendly (EN + FR) :**
-  - `docs/GETTING_STARTED.md` / `docs/GETTING_STARTED_FR.md`
-  - `docs/WIFI_SETUP.md` / `docs/WIFI_SETUP_FR.md`
-  - `docs/OTA_UPDATE.md` / `docs/OTA_UPDATE_FR.md`
-  - `docs/HARDWARE_SETUP.md` / `docs/HARDWARE_SETUP_FR.md`
-- Sections dépannage complètes
-- Schémas câblage et consignes sécurité
-- Tables brochage GPIO pour toutes cartes supportées
-
-### 🔄 Modifié
-
-#### Système d'Affichage
-- **Renommage constantes ST7789 en nommage TFT générique** (#1)
-  - `ST7789_WIDTH` → `TFT_WIDTH`
-  - `ST7789_HEIGHT` → `TFT_HEIGHT`
-  - `ST7789_ROTATION` → `TFT_ROTATION`
-  - Mise à jour toutes références dans `config.h`, `display.cpp`, `main.cpp`
-  - Raison : Support types multiples écrans TFT (ST7789, ILI9341, ST7735, etc.)
-
-#### Interface Web
-- **Remplacement popups confirm() par validations inline** (#2)
-  - Bouton redémarrage affiche maintenant messages statut inline
-  - Upload OTA utilise barres progression et divs statut
-  - Meilleure expérience utilisateur (pas dialogues bloquants)
-  - Messages statut : info (bleu), succès (vert), erreur (rouge), avertissement (orange)
-
-#### Gestion Version
-- **Mise à jour PROJECT_VERSION vers 0.9.0** dans tous fichiers :
-  - `platformio.ini` : Flags compilation et commentaires
-  - `display.h` : En-tête fichier
-  - `display.cpp` : En-tête fichier et date (2026-01-03)
-  - `web_pages.h` : En-tête fichier
-
-### 🐛 Corrigé
-
-- **Fonctions page OTA** (#2)
-  - Ajout fonction manquante `generateOTAPage()` dans `web_pages.h`
-  - Ajout fonction manquante `generateOTAResultPage()` dans `web_pages.h`
-  - Correction erreurs compilation liées fonctions OTA non déclarées
-
-- **Configuration WiFi** (#2)
-  - Création template `secrets.h` depuis `secrets_exemple.h`
-  - Correction erreurs compilation "WIFI_SSID not declared"
-  - Ajout documentation pour créer `secrets.h` localement
-
-### 📝 Documentation
-
-- **Nouveaux guides complets** (bilingue EN/FR) :
-  - Démarrage : Installation, configuration initiale, vérification
-  - Configuration WiFi : Config multi-réseaux, sécurité, dépannage
-  - Mises à jour OTA : Méthodes OTA web et réseau
-  - Configuration Matériel : Brochages GPIO, guides câblage, pratiques sécurité
-
-- **README mis à jour** (EN/FR) :
-  - Fonctionnalités version 0.9.0
-  - Guide démarrage rapide
-  - Liens nouvelle documentation
-
-### 🔒 Sécurité
-
-- **Isolation identifiants WiFi :**
-  - `secrets.h` ajouté à `.gitignore`
-  - Jamais commité au contrôle de version
-  - Fichiers template fournis pour configuration facile
-
-- **Documentation sécurité OTA :**
-  - Exemples protection par mot de passe
-  - Bonnes pratiques sécurité réseau
-  - Avertissements utilisation réseaux ouverts
-
-### ⚙️ Détails Techniques
-
-**Commits :**
-- aa70c5b - feat: Major refactor v0.9.0 - WiFi system, OTA, TFT naming, NeoPixel Matrix
-- 87cecc2 - fix: Complete v0.9.0 implementation - OTA pages + version update + build fixes
-
-**Fichiers Modifiés :**
-- `include/secrets_exemple.h` (créé)
-- `include/secrets_exemple_FR.h` (créé)
-- `include/board_config.h` (GPIO Matrice NeoPixel ajouté)
-- `include/config.h` (renommage ST7789 → TFT)
-- `include/web_interface.h` (handlers OTA ajoutés)
-- `include/web_pages.h` (générateurs pages OTA ajoutés, validations inline)
-- `include/display.h` (version mise à jour)
-- `src/main.cpp` (refonte WiFi, intégration ArduinoOTA)
-- `src/display.cpp` (constantes TFT mises à jour, version/date mises à jour)
-- `platformio.ini` (version mise à jour vers 0.9.0)
-- `docs/` (8 nouveaux fichiers documentation)
-
-**Lignes Modifiées :**
-- +616 insertions
-- -69 suppressions
-- 11 fichiers modifiés
-
----
-
-## [0.8.2-rc.1] - Version Précédente
-
-Voir historique git pour détails versions précédentes.
-
----
-
-## Légende
-
-- 🚀 **Ajouté** : Nouvelles fonctionnalités
-- 🔄 **Modifié** : Changements fonctionnalité existante
-- 🐛 **Corrigé** : Corrections bugs
-- 🗑️ **Déprécié** : Fonctionnalités bientôt supprimées
-- ❌ **Supprimé** : Fonctionnalités supprimées
-- 🔒 **Sécurité** : Améliorations sécurité
-- 📝 **Documentation** : Changements documentation
-
----
-
-## Versionnage
-
-Ce projet suit le [Versionnage Sémantique](https://semver.org/lang/fr/) :
-- **MAJEUR** (X.0.0) : Changements API incompatibles
-- **MINEUR** (0.X.0) : Nouvelle fonctionnalité rétrocompatible
-- **PATCH** (0.0.X) : Corrections bugs rétrocompatibles
-
-**Classification v0.9.0 :**
-- Bump version MINEUR (0.8 → 0.9)
-- Raison : Nouvelles fonctionnalités (WiFi multi-réseaux, OTA, Matrice NeoPixel) ajoutées
-- Rétrocompatibilité : Majoritairement compatible, mais nécessite migration `secrets.h`
-
----
-
-## Guide Migration : 0.8.x → 0.9.0
-
-### Changements Incompatibles
-
-1. **Format Configuration WiFi :**
-   - **Ancien format (supprimé) :**
-     ```cpp
-     const char* WIFI_NETWORKS[][2] = {
-         {"SSID1", "PASS1"},
-         {"SSID2", "PASS2"}
-     };
-     ```
-   - **Nouveau format (requis) :**
-     ```cpp
-     const char* WIFI_SSID1 = "SSID1";
-     const char* WIFI_PASS1 = "PASS1";
-     const char* WIFI_SSID2 = "SSID2";
-     const char* WIFI_PASS2 = "PASS2";
-     ```
-
-2. **Fichier secrets.h :**
-   - Doit créer `include/secrets.h` depuis template :
-     ```bash
-     cp include/secrets_exemple_FR.h include/secrets.h
-     ```
-   - Éditer avec vos identifiants WiFi
-
-3. **Constantes Affichage (migration optionnelle) :**
-   - Anciennes constantes `ST7789_*` fonctionnent toujours mais dépréciées
-   - Recommandé : Mettre à jour code personnalisé pour utiliser constantes `TFT_*`
-
-### Nouvelles Fonctionnalités à Activer
-
-1. **Mises à jour OTA :**
-   - Déjà activées par défaut (ArduinoOTA + Web OTA)
-   - Accès interface web : `http://<IP-ESP32>/ota`
-   - Optionnel : Ajouter protection mot de passe (voir OTA_UPDATE_FR.md)
-
-2. **Matrice NeoPixel :**
-   - Décommenter dans `board_config.h` :
-     ```cpp
-     #define HAS_NEOPIXEL_MATRIX
-     ```
-   - Câbler sur GPIO 3 (ESP32-S3) ou GPIO 2 (ESP32 Classic)
-
----
-
-Pour changements détaillés, voir [historique commits](https://github.com/morfredus/Base_ESP32_Multi/commits/main).
+- **MAJEUR** : Changements incompatibles avec les versions précédentes
+- **MINEUR** : Ajout de fonctionnalités compatibles avec les versions précédentes
+- **CORRECTIF** : Corrections de bugs compatibles avec les versions précédentes
