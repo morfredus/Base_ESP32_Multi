@@ -4,14 +4,28 @@
 /**
  * @file web_styles.h
  * @brief Feuille de styles CSS pour l'interface web
- * @version 0.6.0
- * 
+ * @version 0.8.9
+ * @date 2026-01-04
+ *
+ * CORRECTIF v0.8.9:
+ * - Utilisation de PROGMEM pour stocker le CSS en flash
+ * - Evite l'initialisation de pointeur global au runtime
+ * - Compatible ESP32-S3 avec PSRAM
+ *
  * Module dédié à la gestion des styles CSS de l'interface web.
  * Contient tous les styles pour les cartouches, grille responsive, animations, etc.
  */
 
-// CSS pour l'interface web
-const char* WEB_STYLES = 
+#include <Arduino.h>
+
+// ===================================================================
+// SECTION 1 : STYLES CSS (STOCKES EN FLASH AVEC PROGMEM)
+// ===================================================================
+// IMPORTANT: Utiliser un tableau const char[] au lieu d'un pointeur
+// pour eviter l'initialisation dynamique au runtime qui peut
+// causer un bootloop sur ESP32-S3
+
+static const char WEB_STYLES[] PROGMEM = 
     "* {margin:0;padding:0;box-sizing:border-box;}"
     "body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;}"
     ".container{max-width:900px;margin:0 auto;}"

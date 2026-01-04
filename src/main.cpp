@@ -1,18 +1,22 @@
 /**
  * @file main.cpp
  * @brief Point d'entree principal du projet ESP32 Multi-environnement
- * @version 0.8.8
+ * @version 0.8.9
  * @date 2026-01-04
  *
- * CORRECTIF v0.8.8:
- * - AUCUNE instanciation statique de OneButton (cause du bootloop)
- * - Pointeurs null initialises a nullptr
- * - Creation des objets boutons avec new dans setup()
- * - Evite le "Static Initialization Order Fiasco"
+ * CORRECTIF v0.8.9:
+ * - AUCUNE instanciation statique d'objets complexes
+ * - WiFiMulti, WebServer, OneButton tous en pointeurs
+ * - Creation differee de TOUS les objets dans setup()
+ * - Evite le "Static Initialization Order Fiasco" sur ESP32-S3
  *
- * RAPPEL: Ne JAMAIS instancier d'objets hardware statiquement!
- * Les constructeurs qui font des appels GPIO peuvent bloquer
- * avant que l'ESP32 soit completement initialise.
+ * CORRECTIF v0.8.8:
+ * - Pointeurs null pour OneButton
+ *
+ * RAPPEL CRITIQUE:
+ * Sur ESP32-S3 avec USB CDC, les constructeurs statiques peuvent
+ * s'executer AVANT que le hardware soit pret, causant un bootloop.
+ * TOUJOURS utiliser des pointeurs + new dans setup().
  */
 
 #include <Arduino.h>
@@ -27,17 +31,17 @@
 #include "display.h"
 #include "neopixel.h"
 
-// --- OBJETS ---
-WiFiMulti wifiMulti;
-WebServer server(80);
+// ===================================================================
+// SECTION 1 : POINTEURS GLOBAUX (PAS D'OBJETS STATIQUES!)
+// ===================================================================
+// CORRECTIF v0.8.9: TOUS les objets sont maintenant des pointeurs
+// pour eviter le "Static Initialization Order Fiasco" sur ESP32-S3
 
-// ===================================================================
-// CORRECTIF v0.8.8 : INITIALISATION DIFFEREE DES BOUTONS
-// ===================================================================
-// IMPORTANT: Ne PAS instancier OneButton statiquement!
-// La bibliotheque appelle pinMode() dans le constructeur, ce qui
-// cause un bootloop si execute avant que l'ESP32 soit pret.
-// Solution: pointeurs null + creation avec new dans setup()
+// --- WiFi et Serveur Web ---
+WiFiMulti* pWifiMulti = nullptr;
+WebServer* pServer = nullptr;
+
+// --- Boutons (v0.8.8) ---
 OneButton* pBtn = nullptr;    // Bouton BOOT
 OneButton* pBtn1 = nullptr;   // Bouton 1 - Cycle RGB
 OneButton* pBtn2 = nullptr;   // Bouton 2 - Buzzer
@@ -232,20 +236,28 @@ void handleButton2PressStop() {
     noTone(PIN_BUZZER);
 }
 
-// --- FONCTIONS WIFI ---
+// ===================================================================
+// SECTION 3 : FONCTIONS WIFI
+// ===================================================================
+
 void setupWifi() {
-    LOG_PRINTLN("--- Démarrage WiFiMulti ---");
+    if (pWifiMulti == nullptr) {
+        LOG_PRINTLN("[!!] WiFiMulti non initialise!");
+        return;
+    }
+
+    LOG_PRINTLN("--- Demarrage WiFiMulti v0.8.9 ---");
     int numNetworks = sizeof(WIFI_NETWORKS) / sizeof(WIFI_NETWORKS[0]);
-    
+
     for (int i = 0; i < numNetworks; i++) {
-        wifiMulti.addAP(WIFI_NETWORKS[i][0], WIFI_NETWORKS[i][1]);
+        pWifiMulti->addAP(WIFI_NETWORKS[i][0], WIFI_NETWORKS[i][1]);
     }
 
     LOG_PRINT("Connexion WiFi en cours...");
-    
+
     // Affichage initial sur les écrans
     displayWifiProgress(0);
-    
+
     #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
         setInternalPixelColor(COLOR_YELLOW); // Jaune - connexion en cours
     #endif
@@ -253,24 +265,24 @@ void setupWifi() {
     // Tentatives de connexion avec affichage de la progression
     int attempts = 0;
     const int maxAttempts = 20;
-    
-    while(wifiMulti.run() != WL_CONNECTED && attempts < maxAttempts) {
+
+    while(pWifiMulti->run() != WL_CONNECTED && attempts < maxAttempts) {
         delay(500);
         attempts++;
         int progress = (attempts * 100) / maxAttempts;
-        
-        // Mise à jour de la progression sur les écrans
+
+        // Mise a jour de la progression sur les ecrans
         displayWifiProgress(progress);
-        
+
         LOG_PRINT(".");
     }
-    
-    if(wifiMulti.run() == WL_CONNECTED) {
+
+    if(pWifiMulti->run() == WL_CONNECTED) {
         LOG_PRINTLN(" OK !");
         LOG_PRINT("SSID: "); LOG_PRINTLN(WiFi.SSID());
         LOG_PRINT("IP: "); LOG_PRINTLN(WiFi.localIP());
-        
-        // Affichage des infos de connexion sur les écrans
+
+        // Affichage des infos de connexion sur les ecrans
         displayWifiConnected(WiFi.SSID().c_str(), WiFi.localIP());
 
         #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
@@ -282,46 +294,77 @@ void setupWifi() {
     }
 }
 
-// --- SETUP ---
+// ===================================================================
+// SECTION 4 : SETUP
+// ===================================================================
+
 void setup() {
     Serial.begin(SERIAL_BAUD_RATE);
-    delay(1000); // Wait for Serial USB
+    delay(1000); // Wait for Serial USB (ESP32-S3)
 
-    LOG_PRINTLN("\n=== DEMARRAGE PROJET ===");
+    LOG_PRINTLN("\n=== DEMARRAGE PROJET v0.8.9 ===");
     LOG_PRINTF("Board: %s\n", BOARD_NAME);
     LOG_PRINTF("Version: %s\n", PROJECT_VERSION);
 
-    // Init écrans (OLED et/ou ST7789)
+    // ---------------------------------------------------------------
+    // 4.1 : CREATION DIFFEREE WiFi et WebServer (v0.8.9)
+    // ---------------------------------------------------------------
+    LOG_PRINTLN("--- Init WiFi/WebServer v0.8.9 ---");
+
+    pWifiMulti = new WiFiMulti();
+    if (pWifiMulti != nullptr) {
+        LOG_PRINTLN("[OK] WiFiMulti cree");
+    } else {
+        LOG_PRINTLN("[!!] Echec creation WiFiMulti");
+    }
+
+    pServer = new WebServer(80);
+    if (pServer != nullptr) {
+        LOG_PRINTLN("[OK] WebServer cree");
+    } else {
+        LOG_PRINTLN("[!!] Echec creation WebServer");
+    }
+
+    // ---------------------------------------------------------------
+    // 4.2 : Init Ecrans (OLED et/ou ST7789)
+    // ---------------------------------------------------------------
     setupDisplays();
     displayStartup(PROJECT_NAME, PROJECT_VERSION);
 
-    // Init LED RGB intégrée
+    // ---------------------------------------------------------------
+    // 4.3 : Init LED RGB integree
+    // ---------------------------------------------------------------
     #ifdef HAS_LED_RGB
         pinMode(PIN_LED_RED, OUTPUT);
         pinMode(PIN_LED_GREEN, OUTPUT);
         pinMode(PIN_LED_BLUE, OUTPUT);
-        // Éteindre la LED RGB au démarrage (LOW = éteint)
         digitalWrite(PIN_LED_RED, LOW);
         digitalWrite(PIN_LED_GREEN, LOW);
         digitalWrite(PIN_LED_BLUE, LOW);
     #endif
 
-    // Init NeoPixels (LED interne + Matrice 8x8)
+    // ---------------------------------------------------------------
+    // 4.4 : Init NeoPixels (LED interne + Matrice 8x8)
+    // ---------------------------------------------------------------
     setupNeoPixels();
 
-    // Init LED Builtin (si existante)
+    // ---------------------------------------------------------------
+    // 4.5 : Init LED Builtin (ESP32 Classic uniquement)
+    // ---------------------------------------------------------------
     #ifdef PIN_LED_BUILTIN
         pinMode(PIN_LED_BUILTIN, OUTPUT);
     #endif
 
-    // Init Buzzer
+    // ---------------------------------------------------------------
+    // 4.6 : Init Buzzer
+    // ---------------------------------------------------------------
     pinMode(PIN_BUZZER, OUTPUT);
-    digitalWrite(PIN_BUZZER, LOW); // Éteint au démarrage
+    digitalWrite(PIN_BUZZER, LOW);
 
     // ---------------------------------------------------------------
-    // CREATION DIFFEREE DES BOUTONS (v0.8.8 - evite bootloop)
+    // 4.7 : CREATION DIFFEREE DES BOUTONS (v0.8.8)
     // ---------------------------------------------------------------
-    LOG_PRINTLN("--- Init Boutons v0.8.8 ---");
+    LOG_PRINTLN("--- Init Boutons v0.8.9 ---");
 
     // Bouton BOOT
     pBtn = new OneButton(PIN_BUTTON_BOOT, true);
@@ -358,22 +401,27 @@ void setup() {
     }
 }
 
-// --- LOOP (DOIT TOURNER VITE) ---
+// ===================================================================
+// SECTION 5 : LOOP (DOIT TOURNER VITE)
+// ===================================================================
+
 void loop() {
-    // 1. Surveillance Boutons (CRITIQUE : doit être appelé tout le temps)
-    if (pBtn != nullptr) pBtn->tick();    // Bouton BOOT
-    if (pBtn1 != nullptr) pBtn1->tick();  // Bouton 1 - RGB
-    if (pBtn2 != nullptr) pBtn2->tick();  // Bouton 2 - Buzzer
+    // 5.1 : Surveillance Boutons (CRITIQUE : doit etre appele tout le temps)
+    if (pBtn != nullptr) pBtn->tick();
+    if (pBtn1 != nullptr) pBtn1->tick();
+    if (pBtn2 != nullptr) pBtn2->tick();
 
-    // 2. Gestion Serveur Web
-    server.handleClient();
+    // 5.2 : Gestion Serveur Web
+    if (pServer != nullptr) {
+        pServer->handleClient();
+    }
 
-    // 3. Gestion WiFi (Reconnexion auto)
-    if(wifiMulti.run() != WL_CONNECTED) {
+    // 5.3 : Gestion WiFi (Reconnexion auto)
+    if (pWifiMulti != nullptr && pWifiMulti->run() != WL_CONNECTED) {
         // Optionnel : Gestion LED rouge si perte de connexion
     }
 
-    // 4. Heartbeat Non-Bloquant (remplace delay)
+    // 5.4 : Heartbeat Non-Bloquant (remplace delay)
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= interval) {
         previousMillis = currentMillis;
@@ -386,16 +434,14 @@ void loop() {
 
         #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
             // Gerer la neopixel interne selon les etats WiFi et reboot
-            if (!isRebooting) {  // Si pas en mode reboot
-                if(wifiMulti.run() == WL_CONNECTED) {
-                    // WiFi connecte : heartbeat vert
+            if (!isRebooting) {
+                bool wifiConnected = (pWifiMulti != nullptr && pWifiMulti->run() == WL_CONNECTED);
+                if (wifiConnected) {
                     internalPixelHeartbeat(COLOR_GREEN, ledState);
                 } else {
-                    // WiFi non connecte : heartbeat rouge (recherche ou hors ligne)
                     internalPixelHeartbeat(COLOR_RED, ledState);
                 }
             }
-            // Si isRebooting == true, la neopixel reste violet (deja defini dans handleLongPress)
         #endif
     }
 }
