@@ -1,8 +1,13 @@
 /**
  * @file display.h
  * @brief Module de gestion centralisée des écrans (OLED et ST7789)
- * @version 0.8.6
+ * @version 0.8.7
  * @date 2026-01-04
+ *
+ * CORRECTIF v0.8.7:
+ * - TOUS les includes sont maintenant conditionnels
+ * - Wire.h n'est inclus que si HAS_OLED est defini
+ * - Evite l'initialisation statique des peripheriques inutilises
  *
  * CORRECTIF v0.8.6:
  * - Pas d'instanciation statique (evite bootloop)
@@ -17,19 +22,22 @@
 #define DISPLAY_H
 
 #include <Arduino.h>
-#include <Wire.h>
 #include "config.h"
 
 // ===================================================================
 // SECTION 1 : INCLUDES CONDITIONNELS
 // ===================================================================
+// IMPORTANT: N'inclure les bibliotheques QUE si le module est actif
+// Sinon, l'initialisation des peripheriques peut causer un bootloop!
 
 #ifdef HAS_OLED
+    #include <Wire.h>
     #include <Adafruit_GFX.h>
     #include <Adafruit_SSD1306.h>
 #endif
 
 #ifdef HAS_ST7789
+    #include <SPI.h>
     #include <Adafruit_GFX.h>
     #include <Adafruit_ST7789.h>
 #endif
