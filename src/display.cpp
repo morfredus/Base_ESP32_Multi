@@ -1,8 +1,12 @@
 /**
  * @file display.cpp
  * @brief Implementation du module de gestion des écrans
- * @version 0.8.6
+ * @version 0.8.7
  * @date 2026-01-04
+ *
+ * CORRECTIF v0.8.7:
+ * - Tous les includes (Wire.h, SPI.h) sont conditionnels dans display.h
+ * - Evite l'initialisation des peripheriques inutilises
  *
  * CORRECTIF v0.8.6:
  * - AUCUNE instanciation statique (cause du bootloop)
@@ -16,6 +20,8 @@
  */
 
 #include "display.h"
+
+// Note: Wire.h et SPI.h sont inclus conditionnellement dans display.h
 
 // ===================================================================
 // SECTION 1 : POINTEURS GLOBAUX (INITIALISES A NULL)
@@ -36,7 +42,7 @@
 // ===================================================================
 
 void setupDisplays() {
-    LOG_PRINTLN("--- Init Ecrans v0.8.6 ---");
+    LOG_PRINTLN("--- Init Ecrans v0.8.7 ---");
 
     #ifdef HAS_OLED
         if (setupOled()) {
