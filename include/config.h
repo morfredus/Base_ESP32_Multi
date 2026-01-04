@@ -1,8 +1,12 @@
 /**
  * @file config.h
  * @brief Configuration centrale du projet ESP32 Multi-environnement
- * @version 0.8.8
+ * @version 0.8.9
  * @date 2026-01-04
+ *
+ * CORRECTIF v0.8.9:
+ * - Tous les modules desactives par defaut pour diagnostic
+ * - Reactiver un par un apres confirmation du boot
  *
  * Ce fichier centralise toutes les configurations du projet:
  * - Parametres globaux (debug, serial, WiFi timeout)
