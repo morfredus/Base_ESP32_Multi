@@ -1,3 +1,20 @@
+/**
+ * @file main.cpp
+ * @brief Point d'entree principal du projet ESP32 Multi-environnement
+ * @version 0.8.8
+ * @date 2026-01-04
+ *
+ * CORRECTIF v0.8.8:
+ * - AUCUNE instanciation statique de OneButton (cause du bootloop)
+ * - Pointeurs null initialises a nullptr
+ * - Creation des objets boutons avec new dans setup()
+ * - Evite le "Static Initialization Order Fiasco"
+ *
+ * RAPPEL: Ne JAMAIS instancier d'objets hardware statiquement!
+ * Les constructeurs qui font des appels GPIO peuvent bloquer
+ * avant que l'ESP32 soit completement initialise.
+ */
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiMulti.h>
@@ -13,9 +30,17 @@
 // --- OBJETS ---
 WiFiMulti wifiMulti;
 WebServer server(80);
-OneButton btn(PIN_BUTTON_BOOT, true); // true = Active Low (Bouton poussoir standard vers GND)
-OneButton btn1(PIN_BUTTON_1, true);   // Bouton 1 - Cycle RGB
-OneButton btn2(PIN_BUTTON_2, true);   // Bouton 2 - Buzzer
+
+// ===================================================================
+// CORRECTIF v0.8.8 : INITIALISATION DIFFEREE DES BOUTONS
+// ===================================================================
+// IMPORTANT: Ne PAS instancier OneButton statiquement!
+// La bibliotheque appelle pinMode() dans le constructeur, ce qui
+// cause un bootloop si execute avant que l'ESP32 soit pret.
+// Solution: pointeurs null + creation avec new dans setup()
+OneButton* pBtn = nullptr;    // Bouton BOOT
+OneButton* pBtn1 = nullptr;   // Bouton 1 - Cycle RGB
+OneButton* pBtn2 = nullptr;   // Bouton 2 - Buzzer
 
 // --- VARIABLES GLOBALES ---
 unsigned long previousMillis = 0;
@@ -293,19 +318,36 @@ void setup() {
     pinMode(PIN_BUZZER, OUTPUT);
     digitalWrite(PIN_BUZZER, LOW); // Éteint au démarrage
 
-    // Config Bouton BOOT
-    btn.attachClick(handleClick);
-    btn.attachLongPressStart(handleLongPress);
-    btn.setPressMs(1000); // Durée pour considérer un appui long (ms)
+    // ---------------------------------------------------------------
+    // CREATION DIFFEREE DES BOUTONS (v0.8.8 - evite bootloop)
+    // ---------------------------------------------------------------
+    LOG_PRINTLN("--- Init Boutons v0.8.8 ---");
 
-    // Config Bouton 1 - Cycle RGB
-    btn1.attachClick(handleButton1Click);
-    btn1.setPressMs(1000);
+    // Bouton BOOT
+    pBtn = new OneButton(PIN_BUTTON_BOOT, true);
+    if (pBtn != nullptr) {
+        pBtn->attachClick(handleClick);
+        pBtn->attachLongPressStart(handleLongPress);
+        pBtn->setPressMs(1000);
+        LOG_PRINTLN("[OK] Bouton BOOT initialise");
+    }
 
-    // Config Bouton 2 - Buzzer (à l'appui immédiat avec délai très court)
-    btn2.attachLongPressStart(handleButton2PressStart);
-    btn2.attachLongPressStop(handleButton2PressStop);
-    btn2.setPressMs(50);  // Très court délai pour détecter l'appui immédiat
+    // Bouton 1 - Cycle RGB
+    pBtn1 = new OneButton(PIN_BUTTON_1, true);
+    if (pBtn1 != nullptr) {
+        pBtn1->attachClick(handleButton1Click);
+        pBtn1->setPressMs(1000);
+        LOG_PRINTLN("[OK] Bouton 1 initialise");
+    }
+
+    // Bouton 2 - Buzzer (appui immediat avec delai court)
+    pBtn2 = new OneButton(PIN_BUTTON_2, true);
+    if (pBtn2 != nullptr) {
+        pBtn2->attachLongPressStart(handleButton2PressStart);
+        pBtn2->attachLongPressStop(handleButton2PressStop);
+        pBtn2->setPressMs(50);
+        LOG_PRINTLN("[OK] Bouton 2 initialise");
+    }
 
     setupWifi();
     
@@ -319,9 +361,9 @@ void setup() {
 // --- LOOP (DOIT TOURNER VITE) ---
 void loop() {
     // 1. Surveillance Boutons (CRITIQUE : doit être appelé tout le temps)
-    btn.tick();   // Bouton BOOT
-    btn1.tick();  // Bouton 1 - RGB
-    btn2.tick();  // Bouton 2 - Buzzer
+    if (pBtn != nullptr) pBtn->tick();    // Bouton BOOT
+    if (pBtn1 != nullptr) pBtn1->tick();  // Bouton 1 - RGB
+    if (pBtn2 != nullptr) pBtn2->tick();  // Bouton 2 - Buzzer
 
     // 2. Gestion Serveur Web
     server.handleClient();
