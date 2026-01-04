@@ -1,7 +1,7 @@
 /**
  * @file config.h
  * @brief Configuration centrale du projet ESP32 Multi-environnement
- * @version 0.8.4
+ * @version 0.8.5
  * @date 2026-01-04
  *
  * Ce fichier centralise toutes les configurations du projet:
