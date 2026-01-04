@@ -1,13 +1,42 @@
+/**
+ * @file config.h
+ * @brief Configuration centrale du projet ESP32 Multi-environnement
+ * @version 0.8.3
+ * @date 2026-01-04
+ *
+ * Ce fichier centralise toutes les configurations du projet:
+ * - Parametres globaux (debug, serial, WiFi timeout)
+ * - Activation des modules (OLED, ST7789, NeoPixel, Matrice 8x8)
+ * - Alias de pins vers board_config.h
+ *
+ * REGLES STRICTES:
+ * - NE PAS modifier board_config.h
+ * - NE PAS renommer les constantes de board_config.h
+ * - Les alias PIN_xxx mappent vers les constantes de board_config.h
+ *
+ * ARCHITECTURE NEOPIXEL:
+ * - LED interne GPIO 48 : ESP32-S3 UNIQUEMENT (HAS_NEOPIXEL)
+ * - Matrice 8x8 : DEUX environnements (HAS_MATRIX8X8)
+ * - Les deux coexistent independamment sur ESP32-S3
+ */
+
 #ifndef CONFIG_H
 #define CONFIG_H
 
 #include "board_config.h"
 
-// --- Configuration Globale ---
-#define SERIAL_BAUD_RATE 115200
-#define WIFI_TIMEOUT_MS  10000 // 10 secondes pour tenter la connexion
+// ===================================================================
+// SECTION 1 : CONFIGURATION GLOBALE
+// ===================================================================
 
-// Debug : Décommenter pour voir les logs détaillés
+#define SERIAL_BAUD_RATE 115200
+#define WIFI_TIMEOUT_MS  10000  // 10 secondes pour tenter la connexion
+
+// ===================================================================
+// SECTION 2 : DEBUG
+// ===================================================================
+// Commenter pour desactiver les logs serie
+
 #define ENABLE_DEBUG_LOG
 
 #ifdef ENABLE_DEBUG_LOG
@@ -20,60 +49,63 @@
     #define LOG_PRINTF(...)
 #endif
 
-// --- Configuration OLED (SSD1306) ---
-// Décommenter pour activer l'affichage OLED
+// ===================================================================
+// SECTION 3 : MODULES AFFICHAGE
+// ===================================================================
+
+// --- OLED SSD1306 ---
 #define HAS_OLED
 #define OLED_WIDTH       128
 #define OLED_HEIGHT      64
-#define OLED_ADDR        0x3C  // Adresse I2C standard (0x3D sur certains modèles)
-#define OLED_RESET       -1    // Pas de pin de reset (-1)
+#define OLED_ADDR        0x3C   // Adresse I2C (0x3D sur certains)
+#define OLED_RESET       -1     // Pas de pin reset
 
-// --- Configuration LED RGB ---
-// Décommenter pour activer le contrôle de la LED RGB standard
+// --- TFT ST7789 ---
+#define HAS_ST7789
+#define ST7789_WIDTH     240
+#define ST7789_HEIGHT    240    // 240 carre, 135 rectangulaire
+#define ST7789_ROTATION  2      // Rotation (0-3)
+
+// ===================================================================
+// SECTION 4 : MODULES LED
+// ===================================================================
+
+// --- LED RGB Standard ---
 #define HAS_LED_RGB
 
-// --- Configuration NeoPixel (LED RGB adressable) ---
-// Décommenter pour activer la neopixel intégrée
+// --- NeoPixel interne (ESP32-S3 GPIO 48 UNIQUEMENT) ---
 #define HAS_NEOPIXEL
-#define NEOPIXEL_NUM     1     // Nombre de neopixels (1 pour le modèle intégré)
+#define NEOPIXEL_NUM     1      // 1 LED interne soudee
 
-// --- Configuration Matrice NeoPixel 8x8 (WS2812B) ---
-// Décommenter pour activer la matrice 8x8 (64 LEDs)
+// --- Matrice NeoPixel 8x8 WS2812B (DEUX environnements) ---
+// Utilise MATRIX8X8_PIN et MATRIX8X8_NUMPIXELS de board_config.h
 #define HAS_MATRIX8X8
-#define MATRIX_BRIGHTNESS 30  // Luminosité par défaut de la matrice (0-255)
-
-// --- Configuration ST7789 (TFT couleur) ---
-// Décommenter pour activer l'affichage ST7789
-#define HAS_ST7789
-#define ST7789_WIDTH     240   // Largeur de l'écran en pixels
-#define ST7789_HEIGHT    240   // Hauteur de l'écran (240 pour carré, 135 pour rectangulaire)
-#define ST7789_ROTATION  2     // Rotation de l'écran (0, 1, 2, 3)
-
-// Note : Les couleurs sont définies dans Adafruit_ST77xx.h (ST77XX_BLACK, ST77XX_WHITE, etc.)
+#define MATRIX_BRIGHTNESS 30    // Luminosite par defaut (0-255)
 
 // ===================================================================
-// ALIAS DE PINS (Mapping vers board_config.h)
+// SECTION 5 : ALIAS DE PINS
 // ===================================================================
-// Ces alias permettent une syntaxe cohérente PIN_xxx dans le code
+// Mapping vers les constantes de board_config.h
+// NE PAS RENOMMER les constantes sources!
 
-// Boutons
+// --- Boutons ---
 #define PIN_BUTTON_BOOT   BUTTON_BOOT
 #define PIN_BUTTON_1      BUTTON_1
 #define PIN_BUTTON_2      BUTTON_2
 
-// LEDs
+// --- LEDs RGB ---
 #define PIN_LED_RED       LED_RED
 #define PIN_LED_GREEN     LED_GREEN
 #define PIN_LED_BLUE      LED_BLUE
 
-// Buzzer
+// --- Buzzer ---
 #define PIN_BUZZER        BUZZER
 
-// I2C
+// --- I2C ---
 #define PIN_I2C_SDA       I2C_SDA
 #define PIN_I2C_SCL       I2C_SCL
 
-// TFT
+// --- TFT SPI ---
 #define PIN_TFT_MOSI      TFT_MOSI
 #define PIN_TFT_MISO      TFT_MISO
 #define PIN_TFT_SCLK      TFT_SCLK
@@ -82,17 +114,34 @@
 #define PIN_TFT_RST       TFT_RST
 #define PIN_TFT_BL        TFT_BL
 
-// NeoPixel (LED interne - ESP32-S3 uniquement)
+// --- NeoPixel interne (ESP32-S3 uniquement) ---
 #if defined(TARGET_ESP32_S3)
-    #define PIN_NEOPIXEL  NEOPIXEL
+    #define PIN_NEOPIXEL  NEOPIXEL   // GPIO 48
 #endif
 
-// LED Builtin (ESP32 Classic uniquement)
+// --- LED Builtin (ESP32 Classic uniquement) ---
 #if defined(TARGET_ESP32_CLASSIC)
-    #define PIN_LED_BUILTIN LED_BUILTIN
+    #define PIN_LED_BUILTIN LED_BUILTIN  // GPIO 2
 #endif
 
-// Matrice NeoPixel 8x8 (utilise les constantes de board_config.h)
-// PIN: MATRIX8X8_PIN, NUMPIXELS: MATRIX8X8_NUMPIXELS
+// ===================================================================
+// SECTION 6 : NOTES IMPORTANTES
+// ===================================================================
+/*
+ * CONSTANTES DE board_config.h (NE PAS MODIFIER):
+ *
+ * ESP32-S3:
+ *   NEOPIXEL = 48 (LED interne soudee)
+ *   MATRIX8X8_PIN = 3
+ *   MATRIX8X8_NUMPIXELS = 64
+ *
+ * ESP32 Classic:
+ *   LED_BUILTIN = 2
+ *   MATRIX8X8_PIN = 32
+ *   MATRIX8X8_NUMPIXELS = 64
+ *
+ * Les couleurs ST77xx sont dans Adafruit_ST77xx.h:
+ *   ST77XX_BLACK, ST77XX_WHITE, ST77XX_RED, etc.
+ */
 
-#endif
+#endif // CONFIG_H
