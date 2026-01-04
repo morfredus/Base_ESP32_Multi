@@ -117,7 +117,8 @@
 #define PIN_TFT_BL        TFT_BL
 
 // --- NeoPixel interne (ESP32-S3 uniquement) ---
-#if defined(TARGET_ESP32_S3)
+// Note: PIN_NEOPIXEL peut etre deja defini par le framework Arduino ESP32-S3
+#if defined(TARGET_ESP32_S3) && !defined(PIN_NEOPIXEL)
     #define PIN_NEOPIXEL  NEOPIXEL   // GPIO 48
 #endif
 
