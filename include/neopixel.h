@@ -1,8 +1,13 @@
 /**
  * @file neopixel.h
  * @brief Module de gestion des NeoPixels (LED interne + Matrice 8x8)
- * @version 0.8.5
+ * @version 0.8.7
  * @date 2026-01-04
+ *
+ * CORRECTIF v0.8.7:
+ * - Include Adafruit_NeoPixel.h CONDITIONNEL (evite bootloop)
+ * - La bibliotheque NeoPixel utilise RMT qui peut causer des crashes
+ *   si incluse quand aucun module NeoPixel n'est active
  *
  * CORRECTIF v0.8.5:
  * - Pas d'instanciation statique (evite bootloop)
@@ -27,11 +32,20 @@
 #define NEOPIXEL_H
 
 #include <Arduino.h>
-#include <Adafruit_NeoPixel.h>
 #include "config.h"
 
 // ===================================================================
-// SECTION 1 : POINTEURS GLOBAUX
+// SECTION 1 : INCLUDE CONDITIONNEL ADAFRUIT_NEOPIXEL
+// ===================================================================
+// IMPORTANT: N'inclure la bibliotheque QUE si un module NeoPixel est actif
+// Sinon, l'initialisation RMT de la lib peut causer un bootloop!
+
+#if defined(HAS_NEOPIXEL) || defined(HAS_MATRIX8X8)
+    #include <Adafruit_NeoPixel.h>
+#endif
+
+// ===================================================================
+// SECTION 2 : POINTEURS GLOBAUX
 // ===================================================================
 
 #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
@@ -44,7 +58,7 @@
 #endif
 
 // ===================================================================
-// SECTION 2 : COULEURS (0xRRGGBB)
+// SECTION 3 : COULEURS (0xRRGGBB)
 // ===================================================================
 
 #define COLOR_OFF      0x000000
@@ -59,13 +73,13 @@
 #define COLOR_PURPLE   0x800080
 
 // ===================================================================
-// SECTION 3 : INITIALISATION
+// SECTION 4 : INITIALISATION
 // ===================================================================
 
 void setupNeoPixels();
 
 // ===================================================================
-// SECTION 4 : LED INTERNE (ESP32-S3 GPIO 48)
+// SECTION 5 : LED INTERNE (ESP32-S3 GPIO 48)
 // ===================================================================
 
 #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
@@ -77,7 +91,7 @@ void internalPixelHeartbeat(uint32_t baseColor, bool isHigh);
 #endif
 
 // ===================================================================
-// SECTION 5 : MATRICE 8x8 (DESACTIVEE PAR DEFAUT)
+// SECTION 6 : MATRICE 8x8 (DESACTIVEE PAR DEFAUT)
 // ===================================================================
 
 #ifdef HAS_MATRIX8X8
@@ -99,7 +113,7 @@ void matrixDrawRect(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2,
 #endif
 
 // ===================================================================
-// SECTION 6 : UTILITAIRES
+// SECTION 7 : UTILITAIRES
 // ===================================================================
 
 uint32_t makeColor(uint8_t r, uint8_t g, uint8_t b);

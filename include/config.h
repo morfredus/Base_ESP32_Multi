@@ -1,7 +1,7 @@
 /**
  * @file config.h
  * @brief Configuration centrale du projet ESP32 Multi-environnement
- * @version 0.8.5
+ * @version 0.8.7
  * @date 2026-01-04
  *
  * Ce fichier centralise toutes les configurations du projet:
@@ -52,16 +52,18 @@
 // ===================================================================
 // SECTION 3 : MODULES AFFICHAGE
 // ===================================================================
+// DIAGNOSTIC v0.8.7: Desactiver pour isoler le bootloop
+// Reactiver un par un pour trouver le coupable
 
 // --- OLED SSD1306 ---
-#define HAS_OLED
+// #define HAS_OLED       // DESACTIVE pour diagnostic bootloop
 #define OLED_WIDTH       128
 #define OLED_HEIGHT      64
 #define OLED_ADDR        0x3C   // Adresse I2C (0x3D sur certains)
 #define OLED_RESET       -1     // Pas de pin reset
 
 // --- TFT ST7789 ---
-#define HAS_ST7789
+// #define HAS_ST7789     // DESACTIVE pour diagnostic bootloop
 #define ST7789_WIDTH     240
 #define ST7789_HEIGHT    320    // 240 carre, 135 rectangulaire
 #define ST7789_ROTATION  2      // Rotation (0-3)
@@ -74,7 +76,7 @@
 #define HAS_LED_RGB
 
 // --- NeoPixel interne (ESP32-S3 GPIO 48 UNIQUEMENT) ---
-#define HAS_NEOPIXEL
+// #define HAS_NEOPIXEL   // DESACTIVE pour diagnostic bootloop
 #define NEOPIXEL_NUM     1      // 1 LED interne soudee
 
 // --- Matrice NeoPixel 8x8 WS2812B (DEUX environnements) ---
