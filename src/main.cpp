@@ -80,8 +80,7 @@ void handleLongPress() {
             
             unsigned long startTime = millis();
             const unsigned long progressDuration = 2000; // 2 secondes
-            bool completedFully = false;
-            
+
             while (millis() - startTime < progressDuration) {
                 // Vérifier si le bouton BOOT est toujours appuyé (Active Low = LOW = appuyé)
                 bool buttonStillPressed = (digitalRead(PIN_BUTTON_BOOT) == LOW);
@@ -127,10 +126,9 @@ void handleLongPress() {
                 delay(50); // Mise à jour chaque 50ms
             }
             
-            // Si on est sortie de la boucle normalement, la barre est à 100%
+            // Si on est sortie de la boucle normalement, la barre est a 100%
             if (isRebooting && digitalRead(PIN_BUTTON_BOOT) == LOW) {
-                LOG_PRINTLN(">> Barre complétée à 100% ! Redémarrage...");
-                completedFully = true;
+                LOG_PRINTLN(">> Barre completee a 100% ! Redemarrage...");
             }
         #endif
     #endif
