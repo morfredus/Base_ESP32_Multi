@@ -1,40 +1,36 @@
 /**
  * @file neopixel.cpp
  * @brief Implementation du module de gestion des NeoPixels
- * @version 0.8.4
+ * @version 0.8.5
  * @date 2026-01-04
  *
- * CORRECTIFS v0.8.4:
- * - Retour a l'instanciation statique (allocation dynamique causait crash)
- * - Matrice 8x8 desactivee par defaut (cause de bootloop)
- * - Delai yield() pour eviter watchdog timeout
- * - Initialisation sequentielle avec verifications
+ * CORRECTIFS v0.8.5:
+ * - AUCUNE instanciation statique (cause du bootloop)
+ * - Pointeurs null initialises a nullptr
+ * - Creation des objets avec new dans setupNeoPixels()
+ * - Evite le "Static Initialization Order Fiasco"
  *
  * REGLES STRICTES:
  * - NE PAS modifier board_config.h
  * - NE PAS renommer MATRIX8X8_PIN, MATRIX8X8_NUMPIXELS, NEOPIXEL
  * - LED interne GPIO 48 = ESP32-S3 UNIQUEMENT
- * - Matrice 8x8 = DESACTIVEE par defaut (decommenter HAS_MATRIX8X8)
+ * - Matrice 8x8 = DESACTIVEE par defaut
  */
 
 #include "neopixel.h"
 
 // ===================================================================
-// SECTION 1 : INSTANCIATION STATIQUE DES OBJETS
+// SECTION 1 : POINTEURS GLOBAUX (INITIALISES A NULL)
 // ===================================================================
-// Instanciation statique pour eviter les crashs d'allocation dynamique
+// IMPORTANT: Pas d'instanciation statique ici!
+// Les objets sont crees dans setupNeoPixels() avec new
 
 #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
-    // LED NeoPixel interne soudee sur GPIO 48 (ESP32-S3 uniquement)
-    static Adafruit_NeoPixel _internalPixel(NEOPIXEL_NUM, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
-    Adafruit_NeoPixel* pInternalPixel = &_internalPixel;
-    static bool internalPixelReady = false;
+    Adafruit_NeoPixel* pInternalPixel = nullptr;
 #endif
 
 #ifdef HAS_MATRIX8X8
-    // Matrice 8x8 WS2812B - 64 LEDs
-    static Adafruit_NeoPixel _matrix8x8(MATRIX8X8_NUMPIXELS, MATRIX8X8_PIN, NEO_GRB + NEO_KHZ800);
-    Adafruit_NeoPixel* pMatrix8x8 = &_matrix8x8;
+    Adafruit_NeoPixel* pMatrix8x8 = nullptr;
     bool matrix8x8Available = false;
 #endif
 
@@ -43,46 +39,50 @@
 // ===================================================================
 
 void setupNeoPixels() {
-    LOG_PRINTLN("--- Initialisation NeoPixels v0.8.4 ---");
+    LOG_PRINTLN("--- Init NeoPixels v0.8.5 ---");
 
     // ---------------------------------------------------------------
     // 2.1 : LED NeoPixel interne (ESP32-S3 uniquement, GPIO 48)
     // ---------------------------------------------------------------
     #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
-        LOG_PRINTLN("[..] Init LED interne GPIO 48...");
-        yield();  // Evite watchdog timeout
+        LOG_PRINTLN("[..] Creation LED interne GPIO 48...");
 
-        _internalPixel.begin();
-        yield();
+        // Creation DIFFEREE de l'objet (evite crash au boot)
+        pInternalPixel = new Adafruit_NeoPixel(NEOPIXEL_NUM, PIN_NEOPIXEL,
+                                                NEO_GRB + NEO_KHZ800);
 
-        _internalPixel.setBrightness(30);
-        _internalPixel.clear();
-        _internalPixel.show();
-
-        internalPixelReady = true;
-        LOG_PRINTLN("[OK] LED interne GPIO 48 prete");
-
-        delay(10);  // Court delai stabilisation
+        if (pInternalPixel != nullptr) {
+            pInternalPixel->begin();
+            pInternalPixel->setBrightness(30);
+            pInternalPixel->clear();
+            pInternalPixel->show();
+            LOG_PRINTLN("[OK] LED interne GPIO 48 prete");
+        } else {
+            LOG_PRINTLN("[!!] Echec creation LED interne");
+        }
     #endif
 
     // ---------------------------------------------------------------
-    // 2.2 : Matrice 8x8 (desactivee par defaut - cause bootloop)
+    // 2.2 : Matrice 8x8 (desactivee par defaut)
     // ---------------------------------------------------------------
     #ifdef HAS_MATRIX8X8
-        LOG_PRINTF("[..] Init matrice 8x8 GPIO %d...\n", MATRIX8X8_PIN);
-        yield();  // Evite watchdog timeout
+        LOG_PRINTF("[..] Creation matrice 8x8 GPIO %d...\n", MATRIX8X8_PIN);
 
-        _matrix8x8.begin();
-        yield();
+        // Creation DIFFEREE de l'objet
+        pMatrix8x8 = new Adafruit_NeoPixel(MATRIX8X8_NUMPIXELS, MATRIX8X8_PIN,
+                                            NEO_GRB + NEO_KHZ800);
 
-        _matrix8x8.setBrightness(MATRIX_BRIGHTNESS);
-        _matrix8x8.clear();
-        _matrix8x8.show();
-
-        matrix8x8Available = true;
-        LOG_PRINTF("[OK] Matrice 8x8 prete (GPIO %d)\n", MATRIX8X8_PIN);
-
-        // PAS de flash de confirmation!
+        if (pMatrix8x8 != nullptr) {
+            pMatrix8x8->begin();
+            pMatrix8x8->setBrightness(MATRIX_BRIGHTNESS);
+            pMatrix8x8->clear();
+            pMatrix8x8->show();
+            matrix8x8Available = true;
+            LOG_PRINTF("[OK] Matrice 8x8 prete (GPIO %d)\n", MATRIX8X8_PIN);
+        } else {
+            matrix8x8Available = false;
+            LOG_PRINTLN("[!!] Echec creation matrice 8x8");
+        }
     #endif
 
     LOG_PRINTLN("--- NeoPixels OK ---");
@@ -95,37 +95,37 @@ void setupNeoPixels() {
 #if defined(HAS_NEOPIXEL) && defined(TARGET_ESP32_S3)
 
 void setInternalPixelColor(uint32_t color) {
-    if (!internalPixelReady) return;
-    _internalPixel.setPixelColor(0, color);
-    _internalPixel.show();
+    if (pInternalPixel == nullptr) return;
+    pInternalPixel->setPixelColor(0, color);
+    pInternalPixel->show();
 }
 
 void setInternalPixelRGB(uint8_t r, uint8_t g, uint8_t b) {
-    if (!internalPixelReady) return;
-    _internalPixel.setPixelColor(0, _internalPixel.Color(r, g, b));
-    _internalPixel.show();
+    if (pInternalPixel == nullptr) return;
+    pInternalPixel->setPixelColor(0, pInternalPixel->Color(r, g, b));
+    pInternalPixel->show();
 }
 
 void setInternalPixelBrightness(uint8_t brightness) {
-    if (!internalPixelReady) return;
-    _internalPixel.setBrightness(brightness);
-    _internalPixel.show();
+    if (pInternalPixel == nullptr) return;
+    pInternalPixel->setBrightness(brightness);
+    pInternalPixel->show();
 }
 
 void clearInternalPixel() {
-    if (!internalPixelReady) return;
-    _internalPixel.clear();
-    _internalPixel.show();
+    if (pInternalPixel == nullptr) return;
+    pInternalPixel->clear();
+    pInternalPixel->show();
 }
 
 void internalPixelHeartbeat(uint32_t baseColor, bool isHigh) {
-    if (!internalPixelReady) return;
+    if (pInternalPixel == nullptr) return;
     if (isHigh) {
-        _internalPixel.setPixelColor(0, baseColor);
+        pInternalPixel->setPixelColor(0, baseColor);
     } else {
-        _internalPixel.setPixelColor(0, dimColor(baseColor, 0.2f));
+        pInternalPixel->setPixelColor(0, dimColor(baseColor, 0.2f));
     }
-    _internalPixel.show();
+    pInternalPixel->show();
 }
 
 #endif // HAS_NEOPIXEL && TARGET_ESP32_S3
@@ -137,53 +137,46 @@ void internalPixelHeartbeat(uint32_t baseColor, bool isHigh) {
 #ifdef HAS_MATRIX8X8
 
 bool isMatrix8x8Available() {
-    return matrix8x8Available;
+    return matrix8x8Available && (pMatrix8x8 != nullptr);
 }
 
 void setMatrixPixelColor(uint16_t pixel, uint32_t color) {
-    if (!matrix8x8Available || pixel >= MATRIX8X8_NUMPIXELS) return;
-    _matrix8x8.setPixelColor(pixel, color);
+    if (!isMatrix8x8Available() || pixel >= MATRIX8X8_NUMPIXELS) return;
+    pMatrix8x8->setPixelColor(pixel, color);
 }
 
 uint8_t xyToIndex(uint8_t x, uint8_t y) {
     if (x >= 8 || y >= 8) return 255;
-
-    // Layout zigzag (serpentin)
-    if (y % 2 == 0) {
-        return y * 8 + x;           // Lignes paires: gauche -> droite
-    } else {
-        return y * 8 + (7 - x);     // Lignes impaires: droite -> gauche
-    }
+    // Layout zigzag
+    return (y % 2 == 0) ? (y * 8 + x) : (y * 8 + (7 - x));
 }
 
 void setMatrixPixelXY(uint8_t x, uint8_t y, uint32_t color) {
-    if (!matrix8x8Available) return;
+    if (!isMatrix8x8Available()) return;
     uint8_t index = xyToIndex(x, y);
-    if (index != 255) {
-        _matrix8x8.setPixelColor(index, color);
-    }
+    if (index != 255) pMatrix8x8->setPixelColor(index, color);
 }
 
 void fillMatrix(uint32_t color) {
-    if (!matrix8x8Available) return;
+    if (!isMatrix8x8Available()) return;
     for (uint16_t i = 0; i < MATRIX8X8_NUMPIXELS; i++) {
-        _matrix8x8.setPixelColor(i, color);
+        pMatrix8x8->setPixelColor(i, color);
     }
 }
 
 void clearMatrix() {
-    if (!matrix8x8Available) return;
-    _matrix8x8.clear();
+    if (!isMatrix8x8Available()) return;
+    pMatrix8x8->clear();
 }
 
 void setMatrixBrightness(uint8_t brightness) {
-    if (!matrix8x8Available) return;
-    _matrix8x8.setBrightness(brightness);
+    if (!isMatrix8x8Available()) return;
+    pMatrix8x8->setBrightness(brightness);
 }
 
 void showMatrix() {
-    if (!matrix8x8Available) return;
-    _matrix8x8.show();
+    if (!isMatrix8x8Available()) return;
+    pMatrix8x8->show();
 }
 
 // ---------------------------------------------------------------
@@ -191,55 +184,46 @@ void showMatrix() {
 // ---------------------------------------------------------------
 
 void matrixRainbow(uint16_t wait) {
-    if (!matrix8x8Available) return;
-
+    if (!isMatrix8x8Available()) return;
     static uint16_t hue = 0;
     for (uint16_t i = 0; i < MATRIX8X8_NUMPIXELS; i++) {
-        uint16_t pixelHue = hue + (i * 65536L / MATRIX8X8_NUMPIXELS);
-        _matrix8x8.setPixelColor(i, _matrix8x8.gamma32(_matrix8x8.ColorHSV(pixelHue)));
+        pMatrix8x8->setPixelColor(i, pMatrix8x8->gamma32(
+            pMatrix8x8->ColorHSV(hue + (i * 65536L / MATRIX8X8_NUMPIXELS))));
     }
-    _matrix8x8.show();
+    pMatrix8x8->show();
     hue += 256;
     delay(wait);
 }
 
 void matrixWipe(uint32_t color, uint16_t wait) {
-    if (!matrix8x8Available) return;
-
+    if (!isMatrix8x8Available()) return;
     for (uint16_t i = 0; i < MATRIX8X8_NUMPIXELS; i++) {
-        _matrix8x8.setPixelColor(i, color);
-        _matrix8x8.show();
+        pMatrix8x8->setPixelColor(i, color);
+        pMatrix8x8->show();
         delay(wait);
     }
 }
 
 void matrixDrawHLine(uint8_t y, uint32_t color) {
-    if (!matrix8x8Available || y >= 8) return;
-    for (uint8_t x = 0; x < 8; x++) {
-        setMatrixPixelXY(x, y, color);
-    }
+    if (!isMatrix8x8Available() || y >= 8) return;
+    for (uint8_t x = 0; x < 8; x++) setMatrixPixelXY(x, y, color);
 }
 
 void matrixDrawVLine(uint8_t x, uint32_t color) {
-    if (!matrix8x8Available || x >= 8) return;
-    for (uint8_t y = 0; y < 8; y++) {
-        setMatrixPixelXY(x, y, color);
-    }
+    if (!isMatrix8x8Available() || x >= 8) return;
+    for (uint8_t y = 0; y < 8; y++) setMatrixPixelXY(x, y, color);
 }
 
 void matrixDrawRect(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2,
                     uint32_t color, bool filled) {
-    if (!matrix8x8Available) return;
-
+    if (!isMatrix8x8Available()) return;
     if (x1 > x2) { uint8_t t = x1; x1 = x2; x2 = t; }
     if (y1 > y2) { uint8_t t = y1; y1 = y2; y2 = t; }
 
     if (filled) {
-        for (uint8_t y = y1; y <= y2 && y < 8; y++) {
-            for (uint8_t x = x1; x <= x2 && x < 8; x++) {
+        for (uint8_t y = y1; y <= y2 && y < 8; y++)
+            for (uint8_t x = x1; x <= x2 && x < 8; x++)
                 setMatrixPixelXY(x, y, color);
-            }
-        }
     } else {
         for (uint8_t x = x1; x <= x2 && x < 8; x++) {
             setMatrixPixelXY(x, y1, color);
@@ -265,10 +249,8 @@ uint32_t makeColor(uint8_t r, uint8_t g, uint8_t b) {
 uint32_t dimColor(uint32_t color, float factor) {
     if (factor < 0.0f) factor = 0.0f;
     if (factor > 1.0f) factor = 1.0f;
-
     uint8_t r = (uint8_t)(((color >> 16) & 0xFF) * factor);
     uint8_t g = (uint8_t)(((color >> 8) & 0xFF) * factor);
     uint8_t b = (uint8_t)((color & 0xFF) * factor);
-
     return makeColor(r, g, b);
 }

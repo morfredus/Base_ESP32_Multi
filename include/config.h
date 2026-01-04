@@ -1,7 +1,7 @@
 /**
  * @file config.h
  * @brief Configuration centrale du projet ESP32 Multi-environnement
- * @version 0.8.4
+ * @version 0.8.5
  * @date 2026-01-04
  *
  * Ce fichier centralise toutes les configurations du projet:
@@ -74,8 +74,7 @@
 #define HAS_LED_RGB
 
 // --- NeoPixel interne (ESP32-S3 GPIO 48 UNIQUEMENT) ---
-// TEMPORAIREMENT DESACTIVE pour debug bootloop
-// #define HAS_NEOPIXEL
+#define HAS_NEOPIXEL
 #define NEOPIXEL_NUM     1      // 1 LED interne soudee
 
 // --- Matrice NeoPixel 8x8 WS2812B (DEUX environnements) ---
