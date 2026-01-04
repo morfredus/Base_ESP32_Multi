@@ -1,8 +1,12 @@
 /**
  * @file neopixel.cpp
  * @brief Implementation du module de gestion des NeoPixels
- * @version 0.8.5
+ * @version 0.8.7
  * @date 2026-01-04
+ *
+ * CORRECTIF v0.8.7:
+ * - Include Adafruit_NeoPixel.h CONDITIONNEL (evite bootloop)
+ * - La bibliotheque NeoPixel utilise RMT qui peut causer des crashes
  *
  * CORRECTIFS v0.8.5:
  * - AUCUNE instanciation statique (cause du bootloop)
@@ -18,6 +22,8 @@
  */
 
 #include "neopixel.h"
+
+// Note: Adafruit_NeoPixel.h est inclus dans neopixel.h de maniere conditionnelle
 
 // ===================================================================
 // SECTION 1 : POINTEURS GLOBAUX (INITIALISES A NULL)
