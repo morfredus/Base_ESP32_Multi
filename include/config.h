@@ -74,7 +74,8 @@
 #define HAS_LED_RGB
 
 // --- NeoPixel interne (ESP32-S3 GPIO 48 UNIQUEMENT) ---
-#define HAS_NEOPIXEL
+// TEMPORAIREMENT DESACTIVE pour debug bootloop
+// #define HAS_NEOPIXEL
 #define NEOPIXEL_NUM     1      // 1 LED interne soudee
 
 // --- Matrice NeoPixel 8x8 WS2812B (DEUX environnements) ---
