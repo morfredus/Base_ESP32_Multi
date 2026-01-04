@@ -63,7 +63,7 @@
 // --- TFT ST7789 ---
 #define HAS_ST7789
 #define ST7789_WIDTH     240
-#define ST7789_HEIGHT    240    // 240 carre, 135 rectangulaire
+#define ST7789_HEIGHT    320    // 240 carre, 135 rectangulaire
 #define ST7789_ROTATION  2      // Rotation (0-3)
 
 // ===================================================================
