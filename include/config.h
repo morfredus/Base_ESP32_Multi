@@ -1,7 +1,7 @@
 /**
  * @file config.h
  * @brief Configuration centrale du projet ESP32 Multi-environnement
- * @version 0.8.3
+ * @version 0.8.4
  * @date 2026-01-04
  *
  * Ce fichier centralise toutes les configurations du projet:
@@ -78,8 +78,10 @@
 #define NEOPIXEL_NUM     1      // 1 LED interne soudee
 
 // --- Matrice NeoPixel 8x8 WS2812B (DEUX environnements) ---
+// ATTENTION: Cause bootloop si activee avec LED interne!
+// Decommenter UNIQUEMENT si matrice physiquement connectee
 // Utilise MATRIX8X8_PIN et MATRIX8X8_NUMPIXELS de board_config.h
-#define HAS_MATRIX8X8
+// #define HAS_MATRIX8X8
 #define MATRIX_BRIGHTNESS 30    // Luminosite par defaut (0-255)
 
 // ===================================================================
