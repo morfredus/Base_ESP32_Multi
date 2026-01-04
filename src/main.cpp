@@ -52,83 +52,87 @@ void handleLongPress() {
     
     #if defined(HAS_OLED) || defined(HAS_ST7789)
         #ifdef HAS_OLED
-            display_oled.clearDisplay();
-            display_oled.setTextSize(2);
-            display_oled.setCursor(0, 20);
-            display_oled.println("REBOOT...");
-            display_oled.display();
-        #endif
-        
-        #ifdef HAS_ST7789
-            // Afficher barre de progression pendant 2 secondes
-            display_tft.fillScreen(ST77XX_BLACK);
-            display_tft.setTextSize(3);
-            display_tft.setTextColor(ST77XX_RED);
-            
-            int16_t x1, y1;
-            uint16_t w, h;
-            display_tft.getTextBounds("REBOOT", 0, 0, &x1, &y1, &w, &h);
-            int centerX = (ST7789_WIDTH - w) / 2;
-            display_tft.setCursor(centerX, 50);
-            display_tft.println("REBOOT");
-            
-            // Barre de progression
-            int barWidth = ST7789_WIDTH - 40;
-            int barHeight = 30;
-            int barX = 20;
-            int barY = 140;
-            
-            unsigned long startTime = millis();
-            const unsigned long progressDuration = 2000; // 2 secondes
-
-            while (millis() - startTime < progressDuration) {
-                // Vérifier si le bouton BOOT est toujours appuyé (Active Low = LOW = appuyé)
-                bool buttonStillPressed = (digitalRead(PIN_BUTTON_BOOT) == LOW);
-                
-                if (!buttonStillPressed) {
-                    // Bouton relâché avant la fin
-                    LOG_PRINTLN(">> Bouton relâché ! Reboot annulé.");
-                    isRebooting = false;
-                    
-                    // Restaurer l'affichage précédent (WiFi connecté ou non)
-                    if(WiFi.status() == WL_CONNECTED) {
-                        displayWifiConnected(WiFi.SSID().c_str(), WiFi.localIP());
-                    } else {
-                        displayWifiFailed();
-                    }
-                    break;
-                }
-                
-                unsigned long elapsed = millis() - startTime;
-                int progress = (elapsed * 100) / progressDuration;
-                
-                // Efface la zone de la barre
-                display_tft.fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 20, ST77XX_BLACK);
-                
-                // Contour de la barre
-                display_tft.drawRect(barX, barY, barWidth, barHeight, ST77XX_WHITE);
-                
-                // Remplissage de la progression
-                int fillWidth = (barWidth - 4) * progress / 100;
-                if (fillWidth > 0) {
-                    display_tft.fillRect(barX + 2, barY + 2, fillWidth, barHeight - 4, ST77XX_MAGENTA);
-                }
-                
-                // Pourcentage
-                display_tft.setTextSize(2);
-                display_tft.setTextColor(ST77XX_WHITE);
-                String percentStr = String(progress) + "%";
-                display_tft.getTextBounds(percentStr.c_str(), 0, 0, &x1, &y1, &w, &h);
-                centerX = (ST7789_WIDTH - w) / 2;
-                display_tft.setCursor(centerX, barY + barHeight + 5);
-                display_tft.println(percentStr);
-                
-                delay(50); // Mise à jour chaque 50ms
+            if (pDisplayOled != nullptr) {
+                pDisplayOled->clearDisplay();
+                pDisplayOled->setTextSize(2);
+                pDisplayOled->setCursor(0, 20);
+                pDisplayOled->println("REBOOT...");
+                pDisplayOled->display();
             }
-            
-            // Si on est sortie de la boucle normalement, la barre est a 100%
-            if (isRebooting && digitalRead(PIN_BUTTON_BOOT) == LOW) {
-                LOG_PRINTLN(">> Barre completee a 100% ! Redemarrage...");
+        #endif
+
+        #ifdef HAS_ST7789
+            if (pDisplayTft != nullptr) {
+                // Afficher barre de progression pendant 2 secondes
+                pDisplayTft->fillScreen(ST77XX_BLACK);
+                pDisplayTft->setTextSize(3);
+                pDisplayTft->setTextColor(ST77XX_RED);
+
+                int16_t x1, y1;
+                uint16_t w, h;
+                pDisplayTft->getTextBounds("REBOOT", 0, 0, &x1, &y1, &w, &h);
+                int centerX = (ST7789_WIDTH - w) / 2;
+                pDisplayTft->setCursor(centerX, 50);
+                pDisplayTft->println("REBOOT");
+
+                // Barre de progression
+                int barWidth = ST7789_WIDTH - 40;
+                int barHeight = 30;
+                int barX = 20;
+                int barY = 140;
+
+                unsigned long startTime = millis();
+                const unsigned long progressDuration = 2000; // 2 secondes
+
+                while (millis() - startTime < progressDuration) {
+                    // Verifier si le bouton BOOT est toujours appuye (Active Low = LOW = appuye)
+                    bool buttonStillPressed = (digitalRead(PIN_BUTTON_BOOT) == LOW);
+
+                    if (!buttonStillPressed) {
+                        // Bouton relache avant la fin
+                        LOG_PRINTLN(">> Bouton relache ! Reboot annule.");
+                        isRebooting = false;
+
+                        // Restaurer l'affichage precedent (WiFi connecte ou non)
+                        if(WiFi.status() == WL_CONNECTED) {
+                            displayWifiConnected(WiFi.SSID().c_str(), WiFi.localIP());
+                        } else {
+                            displayWifiFailed();
+                        }
+                        break;
+                    }
+
+                    unsigned long elapsed = millis() - startTime;
+                    int progress = (elapsed * 100) / progressDuration;
+
+                    // Efface la zone de la barre
+                    pDisplayTft->fillRect(barX - 2, barY - 2, barWidth + 4, barHeight + 20, ST77XX_BLACK);
+
+                    // Contour de la barre
+                    pDisplayTft->drawRect(barX, barY, barWidth, barHeight, ST77XX_WHITE);
+
+                    // Remplissage de la progression
+                    int fillWidth = (barWidth - 4) * progress / 100;
+                    if (fillWidth > 0) {
+                        pDisplayTft->fillRect(barX + 2, barY + 2, fillWidth, barHeight - 4, ST77XX_MAGENTA);
+                    }
+
+                    // Pourcentage
+                    pDisplayTft->setTextSize(2);
+                    pDisplayTft->setTextColor(ST77XX_WHITE);
+                    String percentStr = String(progress) + "%";
+                    pDisplayTft->getTextBounds(percentStr.c_str(), 0, 0, &x1, &y1, &w, &h);
+                    centerX = (ST7789_WIDTH - w) / 2;
+                    pDisplayTft->setCursor(centerX, barY + barHeight + 5);
+                    pDisplayTft->println(percentStr);
+
+                    delay(50); // Mise a jour chaque 50ms
+                }
+
+                // Si on est sortie de la boucle normalement, la barre est a 100%
+                if (isRebooting && digitalRead(PIN_BUTTON_BOOT) == LOW) {
+                    LOG_PRINTLN(">> Barre completee a 100% ! Redemarrage...");
+                }
             }
         #endif
     #endif
